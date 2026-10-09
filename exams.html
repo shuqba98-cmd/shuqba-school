@@ -1,149 +1,377 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>مذكرة الامتحانات | مدرسة ذكور شقبا الثانوية</title>
+  <title>سجل الامتحانات | مدرسة ذكور شقبا الثانوية</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: Tahoma, Arial, sans-serif;
-      background: #f2f6f3;
-      color: #20352b;
+      background: #f2f5f9;
+      color: #1d2939;
     }
     header {
-      background: #176b45;
+      background: #124b37;
       color: white;
-      padding: 28px 16px;
+      padding: 25px 15px;
       text-align: center;
     }
-    header h1 { margin: 0 0 10px; font-size: 25px; }
+    header h1 { margin: 0 0 10px; font-size: 23px; }
     header p { margin: 0; }
-    main {
-      width: min(900px, 94%);
-      margin: 24px auto;
-    }
-    .card {
+    main { max-width: 900px; margin: 22px auto; padding: 0 14px; }
+    section {
       background: white;
-      padding: 22px;
+      padding: 20px;
       margin-bottom: 18px;
-      border-radius: 14px;
-      box-shadow: 0 3px 12px #0000000c;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px #0000000b;
     }
-    h2 { color: #176b45; margin-top: 0; }
-    label { display: block; margin: 13px 0 6px; }
+    h2 { color: #124b37; font-size: 20px; margin-top: 0; }
     input, select, textarea, button {
+      box-sizing: border-box;
       width: 100%;
       padding: 12px;
-      border: 1px solid #ccd8d0;
-      border-radius: 8px;
+      margin: 6px 0;
+      border: 1px solid #d0d5dd;
+      border-radius: 7px;
       font: inherit;
     }
     button {
-      background: #176b45;
+      background: #176b4d;
       color: white;
       border: 0;
-      margin-top: 16px;
       cursor: pointer;
+      font-weight: bold;
     }
-    .secondary { background: #405c4b; }
-    .notice { color: #596b60; line-height: 1.8; }
+    button:hover { background: #10553c; }
+    button.reject { background: #a52d2d; }
+    button.secondary { background: #52616b; }
     .exam {
-      border: 1px solid #dce7df;
-      padding: 14px;
-      margin-top: 12px;
-      border-radius: 10px;
+      border: 1px solid #e1e7ed;
+      padding: 13px;
+      border-radius: 9px;
+      margin: 10px 0;
+      line-height: 1.9;
     }
+    .muted { color: #667085; font-size: 14px; }
     .hidden { display: none; }
-    footer { text-align: center; padding: 24px; color: #63766a; }
+    .message { padding: 10px 0; line-height: 1.8; }
+    footer { text-align: center; color: #667085; padding: 20px; }
   </style>
 </head>
 <body>
-  <header>
-    <h1>مدرسة ذكور شقبا الثانوية</h1>
-    <p>مذكرة الامتحانات الإلكترونية</p>
-  </header>
+<header>
+  <h1>مدرسة ذكور شقبا الثانوية</h1>
+  <p>سجل الامتحانات الإلكتروني</p>
+</header>
 
-  <main>
-    <section class="card">
-      <h2>الامتحانات القادمة</h2>
-      <p class="notice">
-        مواعيد الامتحانات المعتمدة من إدارة المدرسة.
-      </p>
-      <div id="publicExams">
-        سيتم عرض المواعيد المعتمدة هنا بعد ربط قاعدة البيانات.
-      </div>
-    </section>
+<main>
+  <section>
+    <h2>📅 الامتحانات المعتمدة</h2>
+    <p class="muted">تظهر هنا مواعيد الامتحانات التي اعتمدتها إدارة المدرسة.</p>
+    <div id="publicExams">جارٍ تحميل الامتحانات...</div>
+  </section>
 
-    <section class="card" id="loginSection">
-      <h2>دخول المعلمين والإدارة</h2>
+  <section id="loginSection">
+    <h2>🔐 دخول المعلمين والإدارة</h2>
+    <form id="loginForm">
       <label for="email">البريد الإلكتروني</label>
       <input id="email" type="email" autocomplete="username"
-             placeholder="أدخل بريدك الإلكتروني">
-
+             placeholder="أدخل البريد المسجل" required>
       <label for="password">كلمة المرور</label>
-      <input id="password" type="password"
-             autocomplete="current-password"
-             placeholder="أدخل كلمة المرور">
+      <input id="password" type="password" autocomplete="current-password"
+             placeholder="كلمة المرور" required>
+      <button type="submit">تسجيل الدخول</button>
+    </form>
+    <div id="loginMessage" class="message" aria-live="polite"></div>
+  </section>
 
-      <button id="loginButton" type="button">تسجيل الدخول</button>
-      <p id="loginMessage" class="notice" aria-live="polite"></p>
-    </section>
+  <section id="accountSection" class="hidden">
+    <h2>👋 مرحبًا بك</h2>
+    <p id="accountInfo"></p>
+    <button id="logoutButton" class="secondary">تسجيل الخروج</button>
+  </section>
 
-    <section class="card hidden" id="teacherSection">
-      <h2>تسجيل امتحان جديد</h2>
-      <p id="welcome"></p>
+  <section id="teacherSection" class="hidden">
+    <h2>📝 تقديم امتحان جديد</h2>
+    <p class="muted">سيبقى الطلب قيد الانتظار حتى تعتمده الإدارة.</p>
+    <form id="examForm">
+      <label for="className">الصف والشعبة</label>
+      <input id="className" placeholder="مثال: التاسع أ" required>
 
-      <form id="examForm">
-        <label for="className">الصف والشعبة</label>
-        <input id="className" required
-               placeholder="مثال: التاسع أ">
+      <label for="subject">المادة</label>
+      <input id="subject" placeholder="اسم المادة" required>
 
-        <label for="subject">المادة</label>
-        <input id="subject" required placeholder="اسم المادة">
+      <label for="examDate">تاريخ الامتحان</label>
+      <input id="examDate" type="date" required>
 
-        <label for="examDate">تاريخ الامتحان</label>
-        <input id="examDate" type="date" required>
+      <label for="examDay">يوم الامتحان</label>
+      <select id="examDay" required>
+        <option value="">اختر اليوم</option>
+        <option>الأحد</option>
+        <option>الاثنين</option>
+        <option>الثلاثاء</option>
+        <option>الأربعاء</option>
+        <option>الخميس</option>
+        <option>الجمعة</option>
+        <option>السبت</option>
+      </select>
 
-        <label for="examDay">اليوم</label>
-        <select id="examDay" required>
-          <option value="">اختر اليوم</option>
-          <option>السبت</option>
-          <option>الأحد</option>
-          <option>الاثنين</option>
-          <option>الثلاثاء</option>
-          <option>الأربعاء</option>
-          <option>الخميس</option>
-        </select>
+      <label for="examTime">الحصة أو الوقت</label>
+      <input id="examTime" placeholder="مثال: الحصة الثالثة" required>
 
-        <label for="examTime">وقت الامتحان</label>
-        <input id="examTime" type="time" required>
+      <label for="notes">ملاحظات (اختياري)</label>
+      <textarea id="notes" rows="3"
+                placeholder="المادة المطلوبة أو ملاحظات للطلاب"></textarea>
 
-        <label for="notes">ملاحظات</label>
-        <textarea id="notes" rows="3"
-                  placeholder="ملاحظات اختيارية"></textarea>
+      <button type="submit">إرسال للإدارة للمراجعة</button>
+    </form>
+    <div id="submitMessage" class="message" aria-live="polite"></div>
+  </section>
 
-        <button type="submit">إرسال الامتحان للاعتماد</button>
-      </form>
-      <p id="formMessage" class="notice" aria-live="polite"></p>
-      <button class="secondary" id="logoutButton" type="button">
-        تسجيل الخروج
-      </button>
-    </section>
+  <section id="adminSection" class="hidden">
+    <h2>🛡️ لوحة إدارة الامتحانات</h2>
+    <p class="muted">راجع الطلبات قبل نشرها في سجل الامتحانات المعتمد.</p>
+    <button id="refreshButton" class="secondary">تحديث الطلبات</button>
+    <div id="pendingExams"></div>
+    <div id="adminMessage" class="message" aria-live="polite"></div>
+  </section>
+</main>
 
-    <section class="card hidden" id="adminSection">
-      <h2>لوحة اعتماد الامتحانات</h2>
-      <p class="notice">مراجعة الطلبات قبل نشرها.</p>
-      <div id="pendingExams"></div>
-    </section>
-  </main>
+<footer>مدرسة ذكور شقبا الثانوية</footer>
 
-  <footer>
-    مدرسة ذكور شقبا الثانوية
-  </footer>
+<script>
+  // رابط مشروع المدرسة
+  const SUPABASE_URL = 'https://nxfnpkelpzpvuotuwmrn.supabase.co';
 
-  <!-- ستتم إضافة اتصال Supabase ووظائفه في الخطوة التالية -->
+  // استبدل النص التالي بالمفتاح العام sb_publishable_ الذي نسخته
+  const SUPABASE_KEY = 'ضع_المفتاح_العام_هنا';
+
+  const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  let currentUser = null;
+  let currentRole = null;
+
+  const el = id => document.getElementById(id);
+  const show = (id, visible) => el(id).classList.toggle('hidden', !visible);
+  const message = (id, text) => { el(id).textContent = text; };
+
+  function escapeHTML(value) {
+    return String(value ?? '').replace(/[&<>"']/g, char => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;',
+      '"': '&quot;', "'": '&#39;'
+    })[char]);
+  }
+
+  async function loadPublicExams() {
+    const box = el('publicExams');
+    const { data, error } = await db
+      .from('school_exams')
+      .select('id,class_name,subject,exam_date,exam_day,exam_time,notes')
+      .eq('status', 'approved')
+      .order('exam_date', { ascending: true });
+
+    if (error) {
+      box.textContent = 'تعذر تحميل الامتحانات. تحقق من إعدادات الربط.';
+      return;
+    }
+
+    if (!data.length) {
+      box.textContent = 'لا توجد امتحانات معتمدة حاليًا.';
+      return;
+    }
+
+    box.innerHTML = data.map(exam => `
+      <div class="exam">
+        <strong>${escapeHTML(exam.subject)}</strong>
+        — ${escapeHTML(exam.class_name)}<br>
+        التاريخ: ${escapeHTML(exam.exam_date)}<br>
+        اليوم: ${escapeHTML(exam.exam_day)}<br>
+        الوقت: ${escapeHTML(exam.exam_time)}
+        ${exam.notes ? `<br>ملاحظات: ${escapeHTML(exam.notes)}` : ''}
+      </div>
+    `).join('');
+  }
+
+  async function refreshAccount() {
+    const { data: { user } } = await db.auth.getUser();
+    currentUser = user;
+    currentRole = null;
+
+    show('loginSection', !user);
+    show('accountSection', !!user);
+    show('teacherSection', false);
+    show('adminSection', false);
+
+    if (!user) return;
+
+    const { data: profile, error } = await db
+      .from('school_profiles')
+      .select('full_name,role')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (error || !profile) {
+      el('accountInfo').textContent =
+        'الحساب مسجل، لكن لم يتم العثور على ملفه في school_profiles. راجع الإدارة.';
+      return;
+    }
+
+    currentRole = profile.role;
+    el('accountInfo').textContent =
+      `الاسم: ${profile.full_name} — الصلاحية: ${
+        profile.role === 'admin' ? 'الإدارة' : 'معلم'
+      }`;
+
+    if (currentRole === 'teacher') show('teacherSection', true);
+
+    if (currentRole === 'admin') {
+      show('adminSection', true);
+      await loadPendingExams();
+    }
+  }
+
+  el('loginForm').addEventListener('submit', async event => {
+    event.preventDefault();
+    message('loginMessage', 'جارٍ تسجيل الدخول...');
+
+    const { error } = await db.auth.signInWithPassword({
+      email: el('email').value.trim(),
+      password: el('password').value
+    });
+
+    if (error) {
+      message('loginMessage', 'تعذر تسجيل الدخول. تأكد من البريد وكلمة المرور.');
+      return;
+    }
+
+    el('password').value = '';
+    message('loginMessage', '');
+    await refreshAccount();
+  });
+
+  el('logoutButton').addEventListener('click', async () => {
+    await db.auth.signOut();
+    message('loginMessage', 'تم تسجيل الخروج.');
+    await refreshAccount();
+  });
+
+  el('examForm').addEventListener('submit', async event => {
+    event.preventDefault();
+
+    if (!currentUser || currentRole !== 'teacher') {
+      message('submitMessage', 'يجب تسجيل الدخول بحساب معلم لتقديم الامتحان.');
+      return;
+    }
+
+    message('submitMessage', 'جارٍ إرسال الطلب...');
+
+    const exam = {
+      teacher_id: currentUser.id,
+      class_name: el('className').value.trim(),
+      subject: el('subject').value.trim(),
+      exam_date: el('examDate').value,
+      exam_day: el('examDay').value,
+      exam_time: el('examTime').value.trim(),
+      notes: el('notes').value.trim(),
+      status: 'pending'
+    };
+
+    const { error } = await db.from('school_exams').insert(exam);
+
+    if (error) {
+      message('submitMessage',
+        'لم يتم إرسال الطلب. تحقق من صلاحيات الحساب والحقول المطلوبة.');
+      return;
+    }
+
+    el('examForm').reset();
+    message('submitMessage', 'تم إرسال الامتحان للإدارة بنجاح، وهو بانتظار المراجعة.');
+  });
+
+  async function loadPendingExams() {
+    if (currentRole !== 'admin') return;
+
+    const box = el('pendingExams');
+    box.textContent = 'جارٍ تحميل الطلبات...';
+
+    const { data, error } = await db
+      .from('school_exams')
+      .select('id,class_name,subject,exam_date,exam_day,exam_time,notes,teacher_id')
+      .eq('status', 'pending')
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      box.textContent = 'تعذر تحميل الطلبات. تحقق من صلاحيات الإدارة.';
+      return;
+    }
+
+    if (!data.length) {
+      box.textContent = 'لا توجد طلبات معلقة حاليًا.';
+      return;
+    }
+
+    box.innerHTML = data.map(exam => `
+      <div class="exam">
+        <strong>${escapeHTML(exam.subject)}</strong>
+        — ${escapeHTML(exam.class_name)}<br>
+        التاريخ: ${escapeHTML(exam.exam_date)}<br>
+        اليوم: ${escapeHTML(exam.exam_day)}<br>
+        الوقت: ${escapeHTML(exam.exam_time)}<br>
+        ملاحظات: ${escapeHTML(exam.notes || 'لا توجد')}<br>
+        <button data-id="${escapeHTML(exam.id)}" data-status="approved">
+          موافقة ونشر
+        </button>
+        <button class="reject" data-id="${escapeHTML(exam.id)}"
+                data-status="rejected">
+          رفض الطلب
+        </button>
+      </div>
+    `).join('');
+  }
+
+  el('pendingExams').addEventListener('click', async event => {
+    const button = event.target.closest('button[data-id]');
+    if (!button || currentRole !== 'admin') return;
+
+    const id = button.dataset.id;
+    const status = button.dataset.status;
+    message('adminMessage', 'جارٍ تحديث الطلب...');
+
+    const { error } = await db
+      .from('school_exams')
+      .update({ status })
+      .eq('id', id);
+
+    if (error) {
+      message('adminMessage', 'تعذر تحديث الطلب. تحقق من صلاحيات الإدارة.');
+      return;
+    }
+
+    message('adminMessage',
+      status === 'approved' ? 'تم اعتماد الامتحان.' : 'تم رفض الطلب.');
+    await loadPendingExams();
+    await loadPublicExams();
+  });
+
+  el('refreshButton').addEventListener('click', loadPendingExams);
+
+  async function start() {
+    await loadPublicExams();
+    await refreshAccount();
+  }
+
+  db.auth.onAuthStateChange(() => {
+    setTimeout(() => refreshAccount(), 0);
+  });
+
+  if (SUPABASE_KEY === 'sb_publishable_f6WbaIQ81yCeTQ9wgb_wZw_14UyvrPp') {
+    el('publicExams').textContent =
+      'يلزم إدخال المفتاح العام في إعدادات الصفحة لتشغيل سجل الامتحانات.';
+  } else {
+    start();
+  }
+</script>
 </body>
 </html>
