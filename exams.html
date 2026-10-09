@@ -1,0 +1,149 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>مذكرة الامتحانات | مدرسة ذكور شقبا الثانوية</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Tahoma, Arial, sans-serif;
+      background: #f2f6f3;
+      color: #20352b;
+    }
+    header {
+      background: #176b45;
+      color: white;
+      padding: 28px 16px;
+      text-align: center;
+    }
+    header h1 { margin: 0 0 10px; font-size: 25px; }
+    header p { margin: 0; }
+    main {
+      width: min(900px, 94%);
+      margin: 24px auto;
+    }
+    .card {
+      background: white;
+      padding: 22px;
+      margin-bottom: 18px;
+      border-radius: 14px;
+      box-shadow: 0 3px 12px #0000000c;
+    }
+    h2 { color: #176b45; margin-top: 0; }
+    label { display: block; margin: 13px 0 6px; }
+    input, select, textarea, button {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccd8d0;
+      border-radius: 8px;
+      font: inherit;
+    }
+    button {
+      background: #176b45;
+      color: white;
+      border: 0;
+      margin-top: 16px;
+      cursor: pointer;
+    }
+    .secondary { background: #405c4b; }
+    .notice { color: #596b60; line-height: 1.8; }
+    .exam {
+      border: 1px solid #dce7df;
+      padding: 14px;
+      margin-top: 12px;
+      border-radius: 10px;
+    }
+    .hidden { display: none; }
+    footer { text-align: center; padding: 24px; color: #63766a; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>مدرسة ذكور شقبا الثانوية</h1>
+    <p>مذكرة الامتحانات الإلكترونية</p>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>الامتحانات القادمة</h2>
+      <p class="notice">
+        مواعيد الامتحانات المعتمدة من إدارة المدرسة.
+      </p>
+      <div id="publicExams">
+        سيتم عرض المواعيد المعتمدة هنا بعد ربط قاعدة البيانات.
+      </div>
+    </section>
+
+    <section class="card" id="loginSection">
+      <h2>دخول المعلمين والإدارة</h2>
+      <label for="email">البريد الإلكتروني</label>
+      <input id="email" type="email" autocomplete="username"
+             placeholder="أدخل بريدك الإلكتروني">
+
+      <label for="password">كلمة المرور</label>
+      <input id="password" type="password"
+             autocomplete="current-password"
+             placeholder="أدخل كلمة المرور">
+
+      <button id="loginButton" type="button">تسجيل الدخول</button>
+      <p id="loginMessage" class="notice" aria-live="polite"></p>
+    </section>
+
+    <section class="card hidden" id="teacherSection">
+      <h2>تسجيل امتحان جديد</h2>
+      <p id="welcome"></p>
+
+      <form id="examForm">
+        <label for="className">الصف والشعبة</label>
+        <input id="className" required
+               placeholder="مثال: التاسع أ">
+
+        <label for="subject">المادة</label>
+        <input id="subject" required placeholder="اسم المادة">
+
+        <label for="examDate">تاريخ الامتحان</label>
+        <input id="examDate" type="date" required>
+
+        <label for="examDay">اليوم</label>
+        <select id="examDay" required>
+          <option value="">اختر اليوم</option>
+          <option>السبت</option>
+          <option>الأحد</option>
+          <option>الاثنين</option>
+          <option>الثلاثاء</option>
+          <option>الأربعاء</option>
+          <option>الخميس</option>
+        </select>
+
+        <label for="examTime">وقت الامتحان</label>
+        <input id="examTime" type="time" required>
+
+        <label for="notes">ملاحظات</label>
+        <textarea id="notes" rows="3"
+                  placeholder="ملاحظات اختيارية"></textarea>
+
+        <button type="submit">إرسال الامتحان للاعتماد</button>
+      </form>
+      <p id="formMessage" class="notice" aria-live="polite"></p>
+      <button class="secondary" id="logoutButton" type="button">
+        تسجيل الخروج
+      </button>
+    </section>
+
+    <section class="card hidden" id="adminSection">
+      <h2>لوحة اعتماد الامتحانات</h2>
+      <p class="notice">مراجعة الطلبات قبل نشرها.</p>
+      <div id="pendingExams"></div>
+    </section>
+  </main>
+
+  <footer>
+    مدرسة ذكور شقبا الثانوية
+  </footer>
+
+  <!-- ستتم إضافة اتصال Supabase ووظائفه في الخطوة التالية -->
+</body>
+</html>
