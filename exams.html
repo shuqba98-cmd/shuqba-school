@@ -282,7 +282,9 @@
 
     if (error) {
       message('submitMessage',
-        'لم يتم إرسال الطلب. تحقق من صلاحيات الحساب والحقول المطلوبة.');
+        '
+'خطأ الحفظ: ' + error.message
+.');
       return;
     }
 
