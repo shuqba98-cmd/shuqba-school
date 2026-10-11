@@ -366,7 +366,7 @@ if (error) {
     setTimeout(() => refreshAccount(), 0);
   });
 
-  if (SUPABASE_KEY === 'sb_publishable_f6WbaIQ81yCeTQ9wgb_wZw_14UyvrPp') {
+  if (!SUPABASE_KEY || SUPABASE_KEY === 'ضع_المفتاح_العام_هنا') {
     el('publicExams').textContent =
       'يلزم إدخال المفتاح العام في إعدادات الصفحة لتشغيل سجل الامتحانات.';
   } else {
