@@ -280,13 +280,11 @@
 
     const { error } = await db.from('school_exams').insert(exam);
 
-    if (error) {
-      message('submitMessage',
-        '
-'خطأ الحفظ: ' + error.message
-.');
-      return;
-    }
+if (error) {
+  message('submitMessage', 'خطأ الحفظ: ' + error.message);
+  return;
+}
+
 
     el('examForm').reset();
     message('submitMessage', 'تم إرسال الامتحان للإدارة بنجاح، وهو بانتظار المراجعة.');
