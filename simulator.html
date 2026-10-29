@@ -3,290 +3,350 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>محاكي التوجيهي | مدرسة ذكور شقبا الثانوية</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>محاكي امتحان التوجيهي | مدرسة ذكور شقبا الثانوية</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;font-family:Tahoma,Arial;background:#f1f5f9;color:#172554}
-header{background:#12305a;color:white;text-align:center;padding:24px 12px}
-main{max-width:760px;margin:24px auto;padding:0 12px}
-.card{background:white;padding:22px;border-radius:14px;margin-bottom:18px;box-shadow:0 4px 14px #0000000d}
-h1{font-size:24px}h2{font-size:21px}
-label{display:block;font-weight:bold;margin:14px 0 7px}
-input{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:8px;font-size:16px}
-button{padding:12px 16px;border:0;border-radius:8px;background:#1d4ed8;color:white;font-size:16px;cursor:pointer;margin-top:12px}
-button:disabled{background:#94a3b8;cursor:not-allowed}
-.secondary{background:#475569}
-.option{display:block;padding:13px;border:1px solid #cbd5e1;border-radius:9px;margin:10px 0;cursor:pointer}
-.option:has(input:checked){border-color:#2563eb;background:#eff6ff}
-.option input{width:auto;margin-left:8px}
-.bar{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-weight:bold}
-.note{line-height:1.9;background:#eff6ff;padding:12px;border-radius:8px}
-.hidden{display:none}
-footer{text-align:center;padding:20px;color:#64748b}
+body{
+  margin:0;font-family:Tahoma,Arial,sans-serif;
+  background:#f1f5f9;color:#172554;line-height:1.8
+}
+header{
+  background:#12315a;color:white;text-align:center;
+  padding:24px 12px
+}
+header h1{margin:0;font-size:25px}
+header p{margin:6px 0 0}
+.container{max-width:850px;margin:25px auto;padding:0 14px}
+.card{
+  background:white;padding:22px;border-radius:15px;
+  box-shadow:0 4px 18px #0000000d;margin-bottom:18px
+}
+h2{margin-top:0;color:#12315a}
+label{display:block;font-weight:bold;margin:12px 0 5px}
+input{
+  width:100%;padding:12px;border:1px solid #cbd5e1;
+  border-radius:8px;font-size:16px
+}
+button{
+  border:0;border-radius:9px;padding:12px 20px;
+  font-size:16px;font-weight:bold;cursor:pointer
+}
+.primary{background:#12315a;color:white;width:100%;margin-top:18px}
+.secondary{background:#e2e8f0;color:#12315a}
+button:disabled{opacity:.5;cursor:not-allowed}
+.notice{background:#eff6ff;padding:12px;border-radius:8px}
+.error{color:#b91c1c;font-weight:bold}
+.topbar{
+  display:flex;justify-content:space-between;gap:12px;
+  flex-wrap:wrap;font-weight:bold;margin-bottom:16px
+}
+.timer{color:#b91c1c}
+.question{
+  border:1px solid #e2e8f0;border-radius:12px;
+  padding:16px;margin:15px 0
+}
+.question h3{font-size:17px;margin:0 0 10px}
+.option{
+  display:flex;align-items:flex-start;gap:9px;
+  padding:9px;margin:6px 0;border-radius:8px;
+  background:#f8fafc;cursor:pointer;font-weight:normal
+}
+.option input{width:auto;margin-top:7px}
+.result{text-align:center}
+.score{font-size:34px;font-weight:bold;color:#166534}
+footer{text-align:center;color:#64748b;padding:20px;font-size:14px}
+[hidden]{display:none!important}
 </style>
 </head>
 <body>
+
 <header>
-<h1>محاكي امتحان التوجيهي</h1>
-<p>الفرع الشرعي | مدرسة ذكور شقبا الثانوية</p>
+  <h1>محاكي امتحان التوجيهي</h1>
+  <p>مدرسة ذكور شقبا الثانوية</p>
+  <p>نموذج تدريبي تجريبي</p>
 </header>
-<main>
+
+<main class="container">
+
 <section class="card" id="login">
-<h2>الدخول إلى الامتحان التجريبي</h2>
-<p class="note">نسخة تجريبية أولية. رقم الجلوس ورمز التدريب هنا لا يتحقق منهما خادم؛ لا تستخدم بيانات سرية.</p>
-<label for="seat">رقم الجلوس</label>
-<input id="seat" inputmode="numeric" placeholder="أدخل رقمًا تجريبيًا">
-<label for="code">رمز التدريب</label>
-<input id="code" type="password" placeholder="أدخل أي رمز للتجربة">
-<button id="start">ابدأ الامتحان</button>
-<p id="loginMsg" role="status"></p>
+  <h2>الدخول إلى الامتحان التدريبي</h2>
+  <p class="notice">
+    يتكون النموذج من 10 أسئلة، والعلامة النهائية من 20،
+    والوقت المتاح 15 دقيقة.
+  </p>
+
+  <label for="seat">رقم الجلوس</label>
+  <input id="seat" type="text" placeholder="أدخل رقم الجلوس">
+
+  <label for="trainingCode">رمز التدريب</label>
+  <input id="trainingCode" type="text" placeholder="أدخل رمز التدريب">
+
+  <p id="loginError" class="error" role="alert"></p>
+  <button class="primary" id="startBtn" type="button">ابدأ الامتحان</button>
 </section>
 
-<section class="card hidden" id="exam">
-<div class="bar">
-<span id="progress"></span>
-<span>الوقت المتبقي: <span id="timer">15:00</span></span>
-</div>
-<hr>
-<div id="questionArea"></div>
-<button class="secondary" id="prev">السؤال السابق</button>
-<button id="next">السؤال التالي</button>
-<button id="submit" class="hidden">تسليم الامتحان</button>
-<p id="examMsg" role="status"></p>
+<section class="card" id="exam" hidden>
+  <div class="topbar">
+    <span id="studentInfo"></span>
+    <span>العلامة: 20</span>
+    <span class="timer">الوقت المتبقي: <span id="timer">15:00</span></span>
+  </div>
+
+  <p class="notice">اختر إجابة واحدة لكل سؤال، ثم اضغط «تسليم الامتحان».</p>
+  <form id="examForm">
+    <div id="questions"></div>
+    <button class="primary" type="submit">تسليم الامتحان</button>
+  </form>
 </section>
 
-<section class="card hidden" id="result">
-<h2>نتيجة الامتحان</h2>
-<p id="score" style="font-size:26px;font-weight:bold"></p>
-<p id="details"></p>
-<button onclick="location.reload()">إعادة التجربة</button>
+<section class="card result" id="result" hidden>
+  <h2>نتيجة الامتحان التدريبي</h2>
+  <p id="resultStudent"></p>
+  <div class="score" id="score"></div>
+  <p id="details"></p>
+  <p class="notice">هذه نتيجة محلية لهذا النموذج، ولا تُحفظ في قاعدة بيانات.</p>
+  <button class="secondary" id="restartBtn" type="button">إعادة التدريب</button>
 </section>
+
 </main>
-<footer>مدرسة ذكور شقبا الثانوية © 2026–2027</footer>
+
+<footer>
+  مدرسة ذكور شقبا الثانوية — المساعد الأكاديمي
+</footer>
 
 <script>
-const questions = [
- {q:"ما المصدر الأول للتشريع الإسلامي؟",a:["القرآن الكريم","الإجماع","القياس","العرف"],c:0},
- {q:"كم عدد أركان الإسلام؟",a:["ثلاثة","أربعة","خمسة","ستة"],c:2},
- {q:"ما اسم الشهر الذي يصوم فيه المسلمون؟",a:["شعبان","رمضان","شوال","محرم"],c:1},
- {q:"ما الصلاة التي تُؤدّى خمس مرات يوميًا؟",a:["صلاة الاستسقاء","صلاة العيد","الصلوات المفروضة","صلاة الكسوف فقط"],c:2},
- {q:"أيّ مما يأتي من مقاصد الشريعة؟",a:["حفظ النفس","إهمال الحقوق","نشر الضرر","منع التعاون"],c:0},
- {q:"ما اسم الكتاب الذي أُنزل على النبي محمد ﷺ؟",a:["التوراة","الزبور","الإنجيل","القرآن الكريم"],c:3},
- {q:"ما حكم برّ الوالدين في الإسلام؟",a:["واجب","مكروه","مباح دائمًا فقط","ممنوع"],c:0},
- {q:"أيّ مما يأتي يُعدّ من أركان الإيمان؟",a:["الإيمان بالملائكة","الحج كل عام","صلاة العيد","الصدقة فقط"],c:0},
- {q:"ما المقصود بالزكاة؟",a:["عبادة مالية لها شروط محددة","صلاة يومية","صيام شهر كامل","حج إلى مكة"],c:0},
- {q:"أيّ سلوك يعكس الأمانة؟",a:["إخفاء حقوق الآخرين","حفظ الحقوق وأداؤها","الغش في الامتحان","نقض العهد"],c:1}
+const originalQuestions = [
+  {
+    q:"ما أول أركان الإسلام؟",
+    options:["إقامة الصلاة","إيتاء الزكاة","الشهادتان","صوم رمضان"],
+    answer:2
+  },
+  {
+    q:"كم عدد الصلوات المفروضة في اليوم والليلة؟",
+    options:["ثلاث صلوات","أربع صلوات","خمس صلوات","ست صلوات"],
+    answer:2
+  },
+  {
+    q:"ما الكتاب الذي أُنزل على النبي محمد صلى الله عليه وسلم؟",
+    options:["التوراة","الإنجيل","الزبور","القرآن الكريم"],
+    answer:3
+  },
+  {
+    q:"ما الشهر الذي يصوم فيه المسلمون؟",
+    options:["شعبان","رمضان","شوال","محرم"],
+    answer:1
+  },
+  {
+    q:"ما قبلة المسلمين في الصلاة؟",
+    options:["المسجد الأقصى","المسجد النبوي","الكعبة المشرفة","جبل عرفات"],
+    answer:2
+  },
+  {
+    q:"ما اسم الغار الذي نزل فيه الوحي أول مرة؟",
+    options:["غار ثور","غار حراء","غار أحد","غار بدر"],
+    answer:1
+  },
+  {
+    q:"أيّ مما يأتي يُعد من أركان الإيمان؟",
+    options:["الإيمان بالملائكة","الحج كل عام","صلاة الضحى","صلة الرحم"],
+    answer:0
+  },
+  {
+    q:"ما اسم النبي الذي ابتلعه الحوت؟",
+    options:["موسى عليه السلام","يوسف عليه السلام","يونس عليه السلام","إبراهيم عليه السلام"],
+    answer:2
+  },
+  {
+    q:"ما السورة التي تُقرأ في كل ركعة من الصلاة؟",
+    options:["سورة الإخلاص","سورة الفاتحة","سورة الفلق","سورة الناس"],
+    answer:1
+  },
+  {
+    q:"ما معنى الصدق؟",
+    options:[
+      "قول الحقيقة وموافقتها للواقع",
+      "إخفاء الحقيقة دائمًا",
+      "نقل الكلام دون التحقق منه",
+      "الوعد دون الوفاء به"
+    ],
+    answer:0
+  }
 ];
 
-let order=[], answers={}, index=0, remaining=900, clock=null, finished=false;
-const $=id=>document.getElementById(id);
+let examQuestions = [];
+let remainingSeconds = 900;
+let timerInterval = null;
+let submitted = false;
+let seatNumber = "";
 
-function shuffle(arr){
- for(let i=arr.length-1;i>0;i--){
-  const j=Math.floor(Math.random()*(i+1));
-  [arr[i],arr[j]]=[arr[j],arr[i]];
- }
- return arr;
+const login = document.getElementById("login");
+const exam = document.getElementById("exam");
+const result = document.getElementById("result");
+const questionsContainer = document.getElementById("questions");
+const timerDisplay = document.getElementById("timer");
+
+function shuffle(array){
+  const copy = [...array];
+  for(let i = copy.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
 }
 
-$("start").addEventListener("click",()=>{
- if(!$("seat").value.trim()||!$("code").value.trim()){
-  $("loginMsg").textContent="أدخل رقم الجلوس ورمز التدريب للمتابعة.";
-  return;
- }
- order=shuffle(questions.map((q,i)=>({
-  ...q,original:i, options:shuffle(q.a.map((label,j)=>({label,correct:j===q.c})))
- })));
- $("login").classList.add("hidden");
- $("exam").classList.remove("hidden");
- render();
- clock=setInterval(()=>{
-  remaining--;
-  $("timer").textContent=Math.floor(remaining/60).toString().padStart(2,"0")+":"+ (remaining%60).toString().padStart(2,"0");
-  if(remaining<=0) finish();
- },1000);
+function prepareQuestions(){
+  examQuestions = shuffle(originalQuestions).map(item => {
+    const options = shuffle(
+      item.options.map((text,index) => ({
+        text,
+        correct:index === item.answer
+      }))
+    );
+    return {
+      q:item.q,
+      options,
+      answer:options.findIndex(option => option.correct)
+    };
+  });
+}
+
+function renderQuestions(){
+  questionsContainer.innerHTML = "";
+
+  examQuestions.forEach((item,index) => {
+    const box = document.createElement("div");
+    box.className = "question";
+
+    const heading = document.createElement("h3");
+    heading.textContent = (index + 1) + ". " + item.q;
+    box.appendChild(heading);
+
+    item.options.forEach((option,optionIndex) => {
+      const label = document.createElement("label");
+      label.className = "option";
+
+      const radio = document.createElement("input");
+      radio.type = "radio";
+      radio.name = "question" + index;
+      radio.value = optionIndex;
+      radio.setAttribute("aria-label",option.text);
+
+      const text = document.createElement("span");
+      text.textContent = option.text;
+
+      label.appendChild(radio);
+      label.appendChild(text);
+      box.appendChild(label);
+    });
+
+    questionsContainer.appendChild(box);
+  });
+}
+
+function updateTimer(){
+  const minutes = Math.floor(remainingSeconds / 60);
+  const seconds = remainingSeconds % 60;
+  timerDisplay.textContent =
+    String(minutes).padStart(2,"0") + ":" +
+    String(seconds).padStart(2,"0");
+}
+
+function startExam(){
+  const seat = document.getElementById("seat").value.trim();
+  const code = document.getElementById("trainingCode").value.trim();
+  const error = document.getElementById("loginError");
+
+  if(!seat || !code){
+    error.textContent = "أدخل رقم الجلوس ورمز التدريب للمتابعة.";
+    return;
+  }
+
+  error.textContent = "";
+  seatNumber = seat;
+  submitted = false;
+  remainingSeconds = 900;
+
+  prepareQuestions();
+  renderQuestions();
+  updateTimer();
+
+  document.getElementById("studentInfo").textContent =
+    "رقم الجلوس: " + seatNumber;
+
+  login.hidden = true;
+  result.hidden = true;
+  exam.hidden = false;
+
+  timerInterval = setInterval(() => {
+    if(submitted) return;
+
+    remainingSeconds--;
+    updateTimer();
+
+    if(remainingSeconds <= 0){
+      finishExam(true);
+    }
+  },1000);
+}
+
+function finishExam(timeEnded){
+  if(submitted) return;
+  submitted = true;
+
+  clearInterval(timerInterval);
+  timerInterval = null;
+
+  let correct = 0;
+  let answered = 0;
+
+  examQuestions.forEach((item,index) => {
+    const selected = document.querySelector(
+      'input[name="question' + index + '"]:checked'
+    );
+
+    if(selected){
+      answered++;
+      if(Number(selected.value) === item.answer){
+        correct++;
+      }
+    }
+  });
+
+  const finalScore = correct * 2;
+
+  exam.hidden = true;
+  result.hidden = false;
+
+  document.getElementById("resultStudent").textContent =
+    "رقم الجلوس: " + seatNumber;
+
+  document.getElementById("score").textContent =
+    finalScore + " / 20";
+
+  document.getElementById("details").textContent =
+    "الإجابات الصحيحة: " + correct + " من 10. " +
+    "الأسئلة المجابة: " + answered + " من 10." +
+    (timeEnded ? " انتهى الوقت." : " تم تسليم الامتحان.");
+}
+
+document.getElementById("startBtn").addEventListener("click",startExam);
+
+document.getElementById("examForm").addEventListener("submit",event => {
+  event.preventDefault();
+  finishExam(false);
 });
 
-function render(){
- const item=order[index];
- $("progress").textContent=`السؤال ${index+1} من ${order.length}`;
- $("questionArea").innerHTML="";
- const title=document.createElement("h2");
- title.textContent=item.q;
- $("questionArea").appendChild(title);
- item.options.forEach((op,j)=>{
-  const label=document.createElement("label");
-  label.className="option";
-  const radio=document.createElement("input");
-  radio.type="radio";radio.name="answer";radio.value=j;
-  radio.checked=answers[index]===j;
-  radio.addEventListener("change",()=>{answers[index]=j;});
-  label.append(radio,document.createTextNode(" "+String.fromCharCode(1571+j)+". "+op.label));
-  $("questionArea").appendChild(label);
- });
- $("prev").disabled=index===0;
- $("next").classList.toggle("hidden",index===order.length-1);
- $("submit").classList.toggle("hidden",index!==order.length-1);
- $("examMsg").textContent="";
-}
+document.getElementById("restartBtn").addEventListener("click",() => {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  login.hidden = false;
+  exam.hidden = true;
+  result.hidden = true;
+  document.getElementById("loginError").textContent = "";
+  document.getElementById("trainingCode").value = "";
+});
 
-$("prev").addEventListener("click",()=>{if(index>0){index--;render();}});
-$("next").addEventListener("click",()=>{if(index<order.length-1){index++;render();}});
-$("submit").addEventListener("click",()=>finish());
-
-function finish(){
- if(finished)return;
- finished=true;
- clearInterval(clock);
- let correct=0;
- order.forEach((q,i)=>{
-  if(answers[i]!==undefined&&q.options[answers[i]].correct)correct++;
- });
- $("exam").classList.add("hidden");
- $("result").classList.remove("hidden");
- $("score").textContent=`علامتك: ${correct*2} من 20`;
- $("details").textContent=`أجبت إجابة صحيحة عن ${correct} من أصل ${order.length} أسئلة. هذه نتيجة محلية تجريبية ولا تُحفظ في قاعدة بيانات.`;
-}
 </script>
-</body>
-</html>
-
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>محاكي امتحان التوجيهي | مدرسة ذكور شقبا الثانوية</title>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: Tahoma, Arial, sans-serif;
-      background: #f1f5f9;
-      color: #172554;
-    }
-    header {
-      background: #12305a;
-      color: white;
-      text-align: center;
-      padding: 28px 15px;
-    }
-    header h1 { margin: 0 0 10px; font-size: 25px; }
-    header p { margin: 0; line-height: 1.8; }
-    main {
-      width: min(700px, 92%);
-      margin: 28px auto;
-    }
-    .card {
-      background: white;
-      border-radius: 16px;
-      padding: 24px;
-      margin-bottom: 18px;
-      box-shadow: 0 4px 16px #0f172a12;
-    }
-    h2 { margin-top: 0; }
-    label {
-      display: block;
-      margin: 16px 0 8px;
-      font-weight: bold;
-    }
-    input, select {
-      width: 100%;
-      padding: 13px;
-      border: 1px solid #cbd5e1;
-      border-radius: 9px;
-      font-size: 16px;
-      background: white;
-    }
-    button {
-      width: 100%;
-      padding: 14px;
-      margin-top: 20px;
-      border: 0;
-      border-radius: 9px;
-      background: #1d4ed8;
-      color: white;
-      font-size: 17px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    button:hover { background: #1e40af; }
-    .note {
-      background: #eff6ff;
-      border-right: 4px solid #2563eb;
-      padding: 14px;
-      border-radius: 8px;
-      line-height: 1.9;
-    }
-    .status {
-      color: #475569;
-      line-height: 1.9;
-      text-align: center;
-    }
-    footer {
-      text-align: center;
-      padding: 22px;
-      color: #64748b;
-      font-size: 14px;
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <h1>محاكي امتحان التوجيهي</h1>
-    <p>الفرع الشرعي</p>
-    <p>مدرسة ذكور شقبا الثانوية</p>
-  </header>
-
-  <main>
-    <section class="card">
-      <h2>مرحبًا بك في المحاكي التدريبي</h2>
-      <p class="status">
-        تدرب على نمط أسئلة الاختيار من متعدد واستعد للامتحان
-        في أجواء تحاكي الامتحان الحقيقي.
-      </p>
-      <div class="note">
-        هذه نسخة أولية قيد التجهيز. سيتم تفعيل الأسئلة
-        والوقت والتصحيح الآلي بعد إعداد بنك الأسئلة.
-      </div>
-
-      <label for="seat">رقم الجلوس</label>
-      <input id="seat" type="text" inputmode="numeric"
-        placeholder="أدخل رقم الجلوس للتدريب">
-
-      <label for="code">رمز التدريب</label>
-      <input id="code" type="password"
-        placeholder="أدخل رمز التدريب">
-
-      <label for="branch">الفرع</label>
-      <select id="branch">
-        <option value="شرعي">التوجيهي – الفرع الشرعي</option>
-      </select>
-
-      <button type="button" id="start">الدخول إلى المحاكي</button>
-      <p id="message" class="status" aria-live="polite"></p>
-    </section>
-  </main>
-
-  <footer>
-    مدرسة ذكور شقبا الثانوية © 2026–2027
-  </footer>
-
-  <script>
-    document.getElementById("start").addEventListener("click", function () {
-      const seat = document.getElementById("seat").value.trim();
-      const code = document.getElementById("code").value.trim();
-      const message = document.getElementById("message");
-
-      if (!seat || !code) {
-        message.textContent = "يرجى إدخال رقم الجلوس ورمز التدريب.";
-        return;
-      }
-
-      message.textContent =
-        "واجهة المحاكي جاهزة للتجهيز. لم يتم تفعيل الدخول بعد.";
-    });
-  </script>
 </body>
 </html>
