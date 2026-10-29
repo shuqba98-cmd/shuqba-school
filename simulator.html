@@ -1,0 +1,139 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>محاكي امتحان التوجيهي | مدرسة ذكور شقبا الثانوية</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Tahoma, Arial, sans-serif;
+      background: #f1f5f9;
+      color: #172554;
+    }
+    header {
+      background: #12305a;
+      color: white;
+      text-align: center;
+      padding: 28px 15px;
+    }
+    header h1 { margin: 0 0 10px; font-size: 25px; }
+    header p { margin: 0; line-height: 1.8; }
+    main {
+      width: min(700px, 92%);
+      margin: 28px auto;
+    }
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 18px;
+      box-shadow: 0 4px 16px #0f172a12;
+    }
+    h2 { margin-top: 0; }
+    label {
+      display: block;
+      margin: 16px 0 8px;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 13px;
+      border: 1px solid #cbd5e1;
+      border-radius: 9px;
+      font-size: 16px;
+      background: white;
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 20px;
+      border: 0;
+      border-radius: 9px;
+      background: #1d4ed8;
+      color: white;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover { background: #1e40af; }
+    .note {
+      background: #eff6ff;
+      border-right: 4px solid #2563eb;
+      padding: 14px;
+      border-radius: 8px;
+      line-height: 1.9;
+    }
+    .status {
+      color: #475569;
+      line-height: 1.9;
+      text-align: center;
+    }
+    footer {
+      text-align: center;
+      padding: 22px;
+      color: #64748b;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>محاكي امتحان التوجيهي</h1>
+    <p>الفرع الشرعي</p>
+    <p>مدرسة ذكور شقبا الثانوية</p>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>مرحبًا بك في المحاكي التدريبي</h2>
+      <p class="status">
+        تدرب على نمط أسئلة الاختيار من متعدد واستعد للامتحان
+        في أجواء تحاكي الامتحان الحقيقي.
+      </p>
+      <div class="note">
+        هذه نسخة أولية قيد التجهيز. سيتم تفعيل الأسئلة
+        والوقت والتصحيح الآلي بعد إعداد بنك الأسئلة.
+      </div>
+
+      <label for="seat">رقم الجلوس</label>
+      <input id="seat" type="text" inputmode="numeric"
+        placeholder="أدخل رقم الجلوس للتدريب">
+
+      <label for="code">رمز التدريب</label>
+      <input id="code" type="password"
+        placeholder="أدخل رمز التدريب">
+
+      <label for="branch">الفرع</label>
+      <select id="branch">
+        <option value="شرعي">التوجيهي – الفرع الشرعي</option>
+      </select>
+
+      <button type="button" id="start">الدخول إلى المحاكي</button>
+      <p id="message" class="status" aria-live="polite"></p>
+    </section>
+  </main>
+
+  <footer>
+    مدرسة ذكور شقبا الثانوية © 2026–2027
+  </footer>
+
+  <script>
+    document.getElementById("start").addEventListener("click", function () {
+      const seat = document.getElementById("seat").value.trim();
+      const code = document.getElementById("code").value.trim();
+      const message = document.getElementById("message");
+
+      if (!seat || !code) {
+        message.textContent = "يرجى إدخال رقم الجلوس ورمز التدريب.";
+        return;
+      }
+
+      message.textContent =
+        "واجهة المحاكي جاهزة للتجهيز. لم يتم تفعيل الدخول بعد.";
+    });
+  </script>
+</body>
+</html>
