@@ -126,6 +126,7 @@ footer{text-align:center;color:#64748b;padding:20px;font-size:14px}
 </footer>
 
 <script>
+let ADMIN_ANSWER_KEY = null; // مفتاح الإجابات: 20 قيمة بين 0 و3 يحدده المسؤول قبل النشر.
 const originalQuestions = [
   {
     "q": "المقصود (بقطعي الدلالة) هو ما :",
@@ -317,7 +318,8 @@ let seatNumber = "";
 
 const login = document.getElementById("login");
 const exam = document.getElementById("exam");
-const result = document.getElementById("result");\nconst adminSetup = document.getElementById("adminSetup");
+const result = document.getElementById("result");
+const adminSetup = document.getElementById("adminSetup");
 const questionsContainer = document.getElementById("questions");
 const timerDisplay = document.getElementById("timer");
 
@@ -341,7 +343,8 @@ function prepareQuestions(){
     return {
       q:item.q,
       options,
-      answer:options.findIndex(option => option.correct),\n      originalIndex:item.originalIndex
+      answer:options.findIndex(option => option.correct),
+      originalIndex:item.originalIndex
     };
   });
 }
@@ -392,7 +395,12 @@ function startExam(){
   const code = document.getElementById("trainingCode").value.trim();
   const error = document.getElementById("loginError");
 
-  if(!Array.isArray(ADMIN_ANSWER_KEY) || ADMIN_ANSWER_KEY.length !== 20 || ADMIN_ANSWER_KEY.some(answer => !Number.isInteger(answer) || answer < 0 || answer > 3)){\n    error.textContent = "لم تُعد الإدارة مفتاح الإجابات بعد.";\n    return;\n  }\n\n  if(!seat || !code){
+  if(!Array.isArray(ADMIN_ANSWER_KEY) || ADMIN_ANSWER_KEY.length !== 20 || ADMIN_ANSWER_KEY.some(answer => !Number.isInteger(answer) || answer < 0 || answer > 3)){
+    error.textContent = "لم تُعد الإدارة مفتاح الإجابات بعد.";
+    return;
+  }
+
+  if(!seat || !code){
     error.textContent = "أدخل رقم الجلوس ورمز التدريب للمتابعة.";
     return;
   }
@@ -460,8 +468,8 @@ function finishExam(timeEnded){
     finalScore + " / 20";
 
   document.getElementById("details").textContent =
-    "الإجابات الصحيحة: " + correct + " من 10. " +
-    "الأسئلة المجابة: " + answered + " من 10." +
+    "الإجابات الصحيحة: " + correct + " من 20. " +
+    "الأسئلة المجابة: " + answered + " من 20." +
     (timeEnded ? " انتهى الوقت." : " تم تسليم الامتحان.");
 }
 
@@ -474,7 +482,7 @@ function setupAnswerKeyEditor(){
     const select=document.createElement("select");
     select.dataset.question=index;
     select.innerHTML='<option value="">اختر الإجابة الصحيحة</option>'+
-      item.options.map((option,optionIndex)=>'<option value="'+optionIndex+'">'+String.fromCharCode(1571+optionIndex)+'. '+option.replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[ch]))+'</option>').join("");
+      item.options.map((option,optionIndex)=>'<option value="'+optionIndex+'">'+["أ","ب","ج","د"][optionIndex]+'. '+option.replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[ch]))+'</option>').join("");
     fields.append(label,select);
   });
 }
@@ -490,7 +498,8 @@ if(new URLSearchParams(location.search).get("admin")==="1"){
   adminSetup.hidden=false;
   setupAnswerKeyEditor();
 }
-\ndocument.getElementById("startBtn").addEventListener("click",startExam);
+
+document.getElementById("startBtn").addEventListener("click",startExam);
 
 document.getElementById("examForm").addEventListener("submit",event => {
   event.preventDefault();
@@ -501,6 +510,7 @@ document.getElementById("restartBtn").addEventListener("click",() => {
   clearInterval(timerInterval);
   timerInterval = null;
   login.hidden = false;
+  adminSetup.hidden = !(new URLSearchParams(location.search).get("admin")==="1");
   exam.hidden = true;
   result.hidden = true;
   document.getElementById("loginError").textContent = "";
