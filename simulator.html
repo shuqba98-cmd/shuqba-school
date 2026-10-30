@@ -58,7 +58,10 @@ button:disabled{opacity:.5;cursor:not-allowed}
 footer{text-align:center;color:#64748b;padding:20px;font-size:14px}
 [hidden]{display:none!important}
 .school-logo{display:block;width:120px;height:auto;max-height:100px;object-fit:contain;margin:0 auto 10px;background:#fff;border-radius:10px;padding:5px}
+.teacher-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.teacher-actions button{flex:1}
+.results-wrap{overflow:auto}.results-table{width:100%;border-collapse:collapse;min-width:680px}.results-table th,.results-table td{padding:9px;border-bottom:1px solid #e2e8f0;text-align:right}.results-table th{background:#eef4f8}.field-select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit;background:#fff}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -75,27 +78,63 @@ footer{text-align:center;color:#64748b;padding:20px;font-size:14px}
   <h2>الدخول إلى الامتحان التدريبي</h2>
   <p class="notice">
     يتكون الامتحان من 20 سؤالًا، علامة لكل سؤال (20 علامة)،
-    والوقت المتاح 40 دقيقة.
+    والوقت المتاح 40 دقيقة. التصحيح الحالي تجريبي حتى تزويد مفتاح المعلمة.
   </p>
 
   <label for="seat">رقم الجلوس</label>
   <input id="seat" type="text" placeholder="أدخل رقم الجلوس">
 
+  <label for="branch">الفرع</label>
+  <select id="branch" class="field-select">
+    <option value="">اختر الفرع</option>
+    <option value="علمي">علمي</option>
+    <option value="أدبي">أدبي</option>
+  </select>
+
   <label for="trainingCode">رمز التدريب</label>
   <input id="trainingCode" type="text" placeholder="أدخل رمز التدريب">
 
   <p id="loginError" class="error" role="alert"></p>
-  <p id="keyNotice" class="notice">مفتاح الإجابات الحالي افتراضي للتجربة فقط؛ لا تعتمدوا نتائجه قبل استبداله بمفتاح المعلمة.</p>
+  <p id="keyNotice" class="notice">التصحيح والنتائج محفوظة للتجربة فقط إلى أن يصل مفتاح المعلمة. لا تعتمدوا العلامات الحالية رسميًا.</p>
   <button class="primary" id="startBtn" type="button">ابدأ الامتحان</button>
+  <button class="secondary" id="showTeacherPortal" type="button">دخول المعلم لعرض النتائج</button>
 </section>
 
-<section class="card" id="adminSetup" hidden>
-  <h2>إعداد مفتاح الإجابة قبل النشر</h2>
-  <p class="notice">اختر الإجابة الصحيحة لكل سؤال وفق مفتاح المعلمة. هذه الصفحة لإعداد نسخة النشر؛ المفتاح غير محفوظ تلقائيًا.</p>
-  <div id="answerKeyFields"></div>
-  <button class="primary" id="buildAnswerKey" type="button">إنشاء إعداد المفتاح</button>
-  <label for="answerKeyOutput">انسخ السطر الناتج واستبدل قيمة ADMIN_ANSWER_KEY في الصفحة قبل النشر</label>
-  <textarea id="answerKeyOutput" rows="3" readonly></textarea>
+<section class="card" id="teacherPortal" hidden>
+  <div id="teacherLogin">
+    <h2>دخول المعلم لرصد العلامات</h2>
+    <p class="notice">استخدم حساب المعلم أو الإدارة المسجل في سجل المدرسة.</p>
+    <form id="teacherLoginForm">
+      <label for="teacherEmail">البريد الإلكتروني</label>
+      <input id="teacherEmail" type="email" autocomplete="username" required>
+      <label for="teacherPassword">كلمة المرور</label>
+      <input id="teacherPassword" type="password" autocomplete="current-password" required>
+      <p id="teacherLoginError" class="error" role="alert"></p>
+      <button class="primary" type="submit">تسجيل الدخول</button>
+    </form>
+  </div>
+  <div id="teacherDashboard" hidden>
+    <h2>نتائج الطلاب</h2>
+    <p id="teacherWelcome" class="notice"></p>
+    <label for="resultsBranch">تصفية حسب الفرع</label>
+    <select id="resultsBranch" class="field-select">
+      <option value="all">العلمي والأدبي</option>
+      <option value="علمي">علمي</option>
+      <option value="أدبي">أدبي</option>
+    </select>
+    <div class="teacher-actions">
+      <button class="secondary" id="refreshResults" type="button">تحديث النتائج</button>
+      <button class="secondary" id="teacherLogout" type="button">تسجيل الخروج</button>
+    </div>
+    <p id="resultsMessage" class="muted" aria-live="polite"></p>
+    <div class="results-wrap">
+      <table class="results-table">
+        <thead><tr><th>رقم الجلوس</th><th>الفرع</th><th>العلامة</th><th>المجاب</th><th>حالة العلامة</th><th>وقت التسليم</th></tr></thead>
+        <tbody id="resultsRows"></tbody>
+      </table>
+    </div>
+  </div>
+  <button class="secondary" id="returnToStudent" type="button">العودة إلى دخول الطالب</button>
 </section>
 
 <section class="card" id="exam" hidden>
@@ -106,6 +145,7 @@ footer{text-align:center;color:#64748b;padding:20px;font-size:14px}
   </div>
 
   <p class="notice">اختر إجابة واحدة لكل سؤال، ثم اضغط «تسليم الامتحان».</p>
+  <p id="saveError" class="error" role="alert"></p>
   <form id="examForm">
     <div id="questions"></div>
     <button class="primary" type="submit">تسليم الامتحان</button>
@@ -117,7 +157,7 @@ footer{text-align:center;color:#64748b;padding:20px;font-size:14px}
   <p id="resultStudent"></p>
   <div class="score" id="score"></div>
   <p id="details"></p>
-  <p class="notice">هذه نتيجة محلية لهذا النموذج، ولا تُحفظ في قاعدة بيانات.</p>
+  <p class="notice" id="resultNotice"></p>
   <button class="secondary" id="restartBtn" type="button">إعادة التدريب</button>
 </section>
 
@@ -128,7 +168,14 @@ footer{text-align:center;color:#64748b;padding:20px;font-size:14px}
 </footer>
 
 <script>
-let ADMIN_ANSWER_KEY = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]; // مفتاح تجريبي مؤقت: جميع الإجابات الخيار الأول، ويجب استبداله بمفتاح المعلمة.
+const RESULTS_URL = "https://wsdvhkdeixwotexlquur.supabase.co";
+const RESULTS_KEY = "sb_publishable_WEcwVA21pArWi6HbAbHAUg_ajWl8Pgj";
+const SCHOOL_AUTH_URL = "https://nxfnpkelpzpvuotuwmrn.supabase.co";
+const SCHOOL_AUTH_KEY = "sb_publishable_f6WbaIQ81yCeTQ9wgb_wZw_14UyvrPp";
+const resultsDb = window.supabase.createClient(RESULTS_URL, RESULTS_KEY);
+const staffDb = window.supabase.createClient(SCHOOL_AUTH_URL, SCHOOL_AUTH_KEY);
+let branchName = "";
+
 const originalQuestions = [
   {
     "q": "المقصود (بقطعي الدلالة) هو ما :",
@@ -321,7 +368,6 @@ let seatNumber = "";
 const login = document.getElementById("login");
 const exam = document.getElementById("exam");
 const result = document.getElementById("result");
-const adminSetup = document.getElementById("adminSetup");
 const questionsContainer = document.getElementById("questions");
 const timerDisplay = document.getElementById("timer");
 
@@ -337,17 +383,9 @@ function shuffle(array){
 function prepareQuestions(){
   examQuestions = shuffle(originalQuestions.map((item,originalIndex)=>({...item,originalIndex}))).map(item => {
     const options = shuffle(
-      item.options.map((text,index) => ({
-        text,
-        correct:ADMIN_ANSWER_KEY[item.originalIndex] === index
-      }))
+      item.options.map((text,originalOptionIndex) => ({ text, originalOptionIndex }))
     );
-    return {
-      q:item.q,
-      options,
-      answer:options.findIndex(option => option.correct),
-      originalIndex:item.originalIndex
-    };
+    return { q:item.q, options, originalIndex:item.originalIndex };
   });
 }
 
@@ -395,20 +433,17 @@ function updateTimer(){
 function startExam(){
   const seat = document.getElementById("seat").value.trim();
   const code = document.getElementById("trainingCode").value.trim();
+  const branch = document.getElementById("branch").value;
   const error = document.getElementById("loginError");
 
-  if(!Array.isArray(ADMIN_ANSWER_KEY) || ADMIN_ANSWER_KEY.length !== 20 || ADMIN_ANSWER_KEY.some(answer => !Number.isInteger(answer) || answer < 0 || answer > 3)){
-    error.textContent = "مفتاح الإجابات الحالي تجريبي مؤقت، وليس مفتاح التصحيح المعتمد.";
-    return;
-  }
-
-  if(!seat || !code){
-    error.textContent = "أدخل رقم الجلوس ورمز التدريب للمتابعة.";
+  if(!seat || !code || !branch){
+    error.textContent = "أدخل رقم الجلوس والفرع ورمز التدريب للمتابعة.";
     return;
   }
 
   error.textContent = "";
   seatNumber = seat;
+  branchName = branch;
   submitted = false;
   remainingSeconds = 2400;
 
@@ -417,7 +452,7 @@ function startExam(){
   updateTimer();
 
   document.getElementById("studentInfo").textContent =
-    "رقم الجلوس: " + seatNumber;
+    "رقم الجلوس: " + seatNumber + " — الفرع: " + branchName;
 
   login.hidden = true;
   result.hidden = true;
@@ -435,73 +470,162 @@ function startExam(){
   },1000);
 }
 
-function finishExam(timeEnded){
+async function finishExam(timeEnded){
   if(submitted) return;
   submitted = true;
-
   clearInterval(timerInterval);
   timerInterval = null;
+  const saveError = document.getElementById("saveError");
+  const submitButton = document.querySelector('#examForm button[type="submit"]');
+  saveError.textContent = "";
+  submitButton.disabled = true;
+  submitButton.textContent = "جارٍ حفظ النتيجة...";
 
-  let correct = 0;
+  const responses = Array(20).fill(null);
   let answered = 0;
-
   examQuestions.forEach((item,index) => {
     const selected = document.querySelector(
       'input[name="question' + index + '"]:checked'
     );
-
     if(selected){
       answered++;
-      if(Number(selected.value) === item.answer){
-        correct++;
-      }
+      const option = item.options[Number(selected.value)];
+      responses[item.originalIndex] = option.originalOptionIndex;
     }
   });
 
-  const finalScore = correct;
+  try{
+    const response = await fetch(RESULTS_URL + "/functions/v1/simulator-results",{
+      method:"POST",
+      headers:{
+        "apikey":RESULTS_KEY,
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({
+        action:"submit",
+        seat_number:seatNumber,
+        branch:branchName,
+        training_code:document.getElementById("trainingCode").value.trim(),
+        responses
+      })
+    });
+    const payload = await response.json();
+    if(!response.ok) throw new Error(payload.error || "تعذر حفظ النتيجة.");
 
-  exam.hidden = true;
-  result.hidden = false;
-
-  document.getElementById("resultStudent").textContent =
-    "رقم الجلوس: " + seatNumber;
-
-  document.getElementById("score").textContent =
-    finalScore + " / 20";
-
-  document.getElementById("details").textContent =
-    "الإجابات الصحيحة: " + correct + " من 20. " +
-    "الأسئلة المجابة: " + answered + " من 20." +
-    (timeEnded ? " انتهى الوقت." : " تم تسليم الامتحان.");
-}
-
-
-function setupAnswerKeyEditor(){
-  const fields=document.getElementById("answerKeyFields");
-  originalQuestions.forEach((item,index)=>{
-    const label=document.createElement("label");
-    label.textContent=(index+1)+". "+item.q;
-    const select=document.createElement("select");
-    select.dataset.question=index;
-    select.innerHTML='<option value="">اختر الإجابة الصحيحة</option>'+
-      item.options.map((option,optionIndex)=>'<option value="'+optionIndex+'">'+["أ","ب","ج","د"][optionIndex]+'. '+option.replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[ch]))+'</option>').join("");
-    fields.append(label,select);
-  });
-}
-document.getElementById("buildAnswerKey").addEventListener("click",()=>{
-  const selected=[...document.querySelectorAll("#answerKeyFields select")].map(select=>select.value===""?null:Number(select.value));
-  if(selected.some(value=>value===null)){
-    document.getElementById("answerKeyOutput").value="أكمل اختيار الإجابة الصحيحة للأسئلة العشرين.";
-    return;
+    exam.hidden = true;
+    result.hidden = false;
+    document.getElementById("resultStudent").textContent =
+      "رقم الجلوس: " + seatNumber + " — الفرع: " + branchName;
+    document.getElementById("score").textContent =
+      payload.score + " / " + payload.max_score;
+    document.getElementById("details").textContent =
+      "الأسئلة المجابة: " + payload.answered_count + " من 20." +
+      (timeEnded ? " انتهى الوقت." : " تم تسليم الامتحان.");
+    document.getElementById("resultNotice").textContent =
+      payload.is_provisional
+        ? "حُفظت النتيجة ليتمكن المعلم من رؤيتها. العلامة مؤقتة لأن مفتاح المعلمة لم يصل بعد."
+        : "حُفظت نتيجتك ويمكن للمعلم مراجعتها.";
+  }catch(error){
+    submitted = false;
+    submitButton.disabled = false;
+    submitButton.textContent = "إعادة محاولة حفظ النتيجة";
+    saveError.textContent = error.message || "تعذر حفظ النتيجة. أعد المحاولة.";
   }
-  document.getElementById("answerKeyOutput").value="let ADMIN_ANSWER_KEY = "+JSON.stringify(selected)+";";
-});
-if(new URLSearchParams(location.search).get("admin")==="1"){
-  adminSetup.hidden=false;
-  setupAnswerKeyEditor();
 }
 
 document.getElementById("startBtn").addEventListener("click",startExam);
+document.getElementById("showTeacherPortal").addEventListener("click",()=>{
+  login.hidden = true;
+  document.getElementById("teacherPortal").hidden = false;
+  document.getElementById("teacherLogin").hidden = false;
+  document.getElementById("teacherDashboard").hidden = true;
+});
+document.getElementById("returnToStudent").addEventListener("click",()=>{
+  document.getElementById("teacherPortal").hidden = true;
+  login.hidden = false;
+});
+document.getElementById("teacherLoginForm").addEventListener("submit",async event=>{
+  event.preventDefault();
+  const errorBox=document.getElementById("teacherLoginError");
+  errorBox.textContent="جارٍ التحقق من الحساب...";
+  const {error}=await staffDb.auth.signInWithPassword({
+    email:document.getElementById("teacherEmail").value.trim(),
+    password:document.getElementById("teacherPassword").value
+  });
+  if(error){
+    errorBox.textContent="تعذر الدخول. تحقق من بيانات الحساب.";
+    return;
+  }
+  document.getElementById("teacherPassword").value="";
+  await openTeacherResults();
+});
+document.getElementById("resultsBranch").addEventListener("change",loadTeacherResults);
+document.getElementById("refreshResults").addEventListener("click",loadTeacherResults);
+document.getElementById("teacherLogout").addEventListener("click",async()=>{
+  await staffDb.auth.signOut();
+  document.getElementById("teacherDashboard").hidden=true;
+  document.getElementById("teacherLogin").hidden=false;
+  document.getElementById("teacherLoginError").textContent="";
+});
+async function openTeacherResults(){
+  const errorBox=document.getElementById("teacherLoginError");
+  const {data:{user}}=await staffDb.auth.getUser();
+  if(!user){errorBox.textContent="سجّل الدخول بحساب المعلم.";return;}
+  const {data:profile,error}=await staffDb.from("school_profiles")
+    .select("full_name,role").eq("user_id",user.id).maybeSingle();
+  if(error||!profile||!["teacher","admin"].includes(profile.role)){
+    errorBox.textContent="هذا الحساب ليس له صلاحية عرض العلامات.";
+    return;
+  }
+  document.getElementById("teacherLogin").hidden=true;
+  document.getElementById("teacherDashboard").hidden=false;
+  document.getElementById("teacherWelcome").textContent=
+    "مرحبًا "+profile.full_name+" — النتائج المسجلة";
+  await loadTeacherResults();
+}
+async function loadTeacherResults(){
+  const message=document.getElementById("resultsMessage");
+  const rows=document.getElementById("resultsRows");
+  message.textContent="جارٍ تحميل النتائج...";
+  rows.replaceChildren();
+  const {data:{session}}=await staffDb.auth.getSession();
+  if(!session){message.textContent="انتهت الجلسة. سجّل الدخول مجددًا.";return;}
+  try{
+    const response=await fetch(RESULTS_URL+"/functions/v1/simulator-results",{
+      method:"POST",
+      headers:{
+        "apikey":RESULTS_KEY,
+        "Authorization":"Bearer "+session.access_token,
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({action:"list",branch:document.getElementById("resultsBranch").value})
+    });
+    const payload=await response.json();
+    if(!response.ok) throw new Error(payload.error||"تعذر تحميل النتائج.");
+    if(!payload.results.length){message.textContent="لا توجد نتائج لهذا الفرع بعد.";return;}
+    payload.results.forEach(item=>{
+      const row=document.createElement("tr");
+      const values=[
+        item.seat_number,
+        item.branch,
+        item.score+" / "+item.max_score,
+        item.answered_count+" / 20",
+        item.is_provisional?"تجريبية":"معتمدة",
+        new Date(item.created_at).toLocaleString("ar-PS")
+      ];
+      values.forEach(value=>{
+        const cell=document.createElement("td");
+        cell.textContent=String(value);
+        row.appendChild(cell);
+      });
+      rows.appendChild(row);
+    });
+    message.textContent="عدد النتائج المعروضة: "+payload.results.length+
+      (payload.results.length===500?" (الحد الأقصى للعرض 500).":"");
+  }catch(error){
+    message.textContent=error.message||"تعذر تحميل النتائج.";
+  }
+}
 
 document.getElementById("examForm").addEventListener("submit",event => {
   event.preventDefault();
@@ -512,11 +636,14 @@ document.getElementById("restartBtn").addEventListener("click",() => {
   clearInterval(timerInterval);
   timerInterval = null;
   login.hidden = false;
-  adminSetup.hidden = !(new URLSearchParams(location.search).get("admin")==="1");
   exam.hidden = true;
   result.hidden = true;
   document.getElementById("loginError").textContent = "";
   document.getElementById("trainingCode").value = "";
+  document.getElementById("branch").value = "";
+  document.getElementById("saveError").textContent = "";
+  document.getElementById("examForm").querySelector('button[type="submit"]').disabled=false;
+  document.getElementById("examForm").querySelector('button[type="submit"]').textContent="تسليم الامتحان";
 });
 
 </script>
