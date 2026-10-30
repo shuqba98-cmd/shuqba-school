@@ -81,8 +81,8 @@ footer{text-align:center;color:#64748b;padding:20px;font-size:14px}
     والوقت المتاح 40 دقيقة. التصحيح الحالي تجريبي حتى تزويد مفتاح المعلمة.
   </p>
 
-  <label for="seat">رقم الجلوس</label>
-  <input id="seat" type="text" placeholder="أدخل رقم الجلوس">
+  <label for="studentName">اسم الطالب</label>
+  <input id="studentName" type="text" placeholder="أدخل اسم الطالب">
 
   <label for="branch">الفرع</label>
   <select id="branch" class="field-select">
@@ -97,12 +97,12 @@ footer{text-align:center;color:#64748b;padding:20px;font-size:14px}
   <p id="loginError" class="error" role="alert"></p>
   <p id="keyNotice" class="notice">التصحيح والنتائج محفوظة للتجربة فقط إلى أن يصل مفتاح المعلمة. لا تعتمدوا العلامات الحالية رسميًا.</p>
   <button class="primary" id="startBtn" type="button">ابدأ الامتحان</button>
-  <button class="secondary" id="showTeacherPortal" type="button">دخول المعلم لعرض النتائج</button>
+  <button class="secondary" id="showTeacherPortal" type="button">دخول الإدارة لعرض النتائج</button>
 </section>
 
 <section class="card" id="teacherPortal" hidden>
   <div id="teacherLogin">
-    <h2>دخول المعلم لرصد العلامات</h2>
+    <h2>دخول الإدارة لرصد العلامات</h2>
     <p class="notice">استخدم حساب المعلم أو الإدارة المسجل في سجل المدرسة.</p>
     <form id="teacherLoginForm">
       <label for="teacherEmail">البريد الإلكتروني</label>
@@ -129,7 +129,7 @@ footer{text-align:center;color:#64748b;padding:20px;font-size:14px}
     <p id="resultsMessage" class="muted" aria-live="polite"></p>
     <div class="results-wrap">
       <table class="results-table">
-        <thead><tr><th>رقم الجلوس</th><th>الفرع</th><th>العلامة</th><th>المجاب</th><th>حالة العلامة</th><th>وقت التسليم</th></tr></thead>
+        <thead><tr><th>اسم الطالب</th><th>الفرع</th><th>العلامة</th><th>المجاب</th><th>حالة العلامة</th><th>وقت التسليم</th></tr></thead>
         <tbody id="resultsRows"></tbody>
       </table>
     </div>
@@ -363,7 +363,7 @@ let examQuestions = [];
 let remainingSeconds = 2400;
 let timerInterval = null;
 let submitted = false;
-let seatNumber = "";
+let studentName = "";
 
 const login = document.getElementById("login");
 const exam = document.getElementById("exam");
@@ -431,18 +431,18 @@ function updateTimer(){
 }
 
 function startExam(){
-  const seat = document.getElementById("seat").value.trim();
+  const studentNameInput = document.getElementById("studentName").value.trim();
   const code = document.getElementById("trainingCode").value.trim();
   const branch = document.getElementById("branch").value;
   const error = document.getElementById("loginError");
 
-  if(!seat || !code || !branch){
-    error.textContent = "أدخل رقم الجلوس والفرع ورمز التدريب للمتابعة.";
+  if(!studentNameInput || !code || !branch){
+    error.textContent = "أدخل اسم الطالب والفرع ورمز التدريب للمتابعة.";
     return;
   }
 
   error.textContent = "";
-  seatNumber = seat;
+  studentName = studentNameInput;
   branchName = branch;
   submitted = false;
   remainingSeconds = 2400;
@@ -452,7 +452,7 @@ function startExam(){
   updateTimer();
 
   document.getElementById("studentInfo").textContent =
-    "رقم الجلوس: " + seatNumber + " — الفرع: " + branchName;
+    "اسم الطالب: " + studentName + " — الفرع: " + branchName;
 
   login.hidden = true;
   result.hidden = true;
@@ -503,7 +503,7 @@ async function finishExam(timeEnded){
       },
       body:JSON.stringify({
         action:"submit",
-        seat_number:seatNumber,
+        student_name:studentName,
         branch:branchName,
         training_code:document.getElementById("trainingCode").value.trim(),
         responses
@@ -515,7 +515,7 @@ async function finishExam(timeEnded){
     exam.hidden = true;
     result.hidden = false;
     document.getElementById("resultStudent").textContent =
-      "رقم الجلوس: " + seatNumber + " — الفرع: " + branchName;
+      "اسم الطالب: " + studentName + " — الفرع: " + branchName;
     document.getElementById("score").textContent =
       payload.score + " / " + payload.max_score;
     document.getElementById("details").textContent =
@@ -606,7 +606,7 @@ async function loadTeacherResults(){
     payload.results.forEach(item=>{
       const row=document.createElement("tr");
       const values=[
-        item.seat_number,
+        item.student_name,
         item.branch,
         item.score+" / "+item.max_score,
         item.answered_count+" / 20",
