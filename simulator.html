@@ -156,7 +156,6 @@ footer{text-align:center;color:#64748b;padding:20px;font-size:14px}
   <h2>تم استلام الامتحان</h2>
   <p id="resultStudent"></p>
   <p class="notice" id="resultNotice"></p>
-  <button class="secondary" id="restartBtn" type="button">إعادة التدريب</button>
 </section>
 
 </main>
@@ -623,19 +622,7 @@ document.getElementById("examForm").addEventListener("submit",event => {
   finishExam(false);
 });
 
-document.getElementById("restartBtn").addEventListener("click",() => {
-  clearInterval(timerInterval);
-  timerInterval = null;
-  login.hidden = false;
-  exam.hidden = true;
-  result.hidden = true;
-  document.getElementById("loginError").textContent = "";
-  document.getElementById("trainingCode").value = "";
-  document.getElementById("branch").value = "";
-  document.getElementById("saveError").textContent = "";
-  document.getElementById("examForm").querySelector('button[type="submit"]').disabled=false;
-  document.getElementById("examForm").querySelector('button[type="submit"]').textContent="تسليم الامتحان";
-});
+
 
 </script>
 </body>
