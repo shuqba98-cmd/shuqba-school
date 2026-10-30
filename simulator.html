@@ -114,7 +114,7 @@ footer{text-align:center;color:#64748b;padding:20px;font-size:14px}
     </form>
   </div>
   <div id="teacherDashboard" hidden>
-    <h2>نتائج الطلاب</h2>
+    <h2>نتائج الطلاب — التربية الإسلامية</h2>
     <p id="teacherWelcome" class="notice"></p>
     <label for="resultsBranch">تصفية حسب الفرع</label>
     <select id="resultsBranch" class="field-select">
@@ -129,7 +129,7 @@ footer{text-align:center;color:#64748b;padding:20px;font-size:14px}
     <p id="resultsMessage" class="muted" aria-live="polite"></p>
     <div class="results-wrap">
       <table class="results-table">
-        <thead><tr><th>اسم الطالب</th><th>الفرع</th><th>العلامة</th><th>المجاب</th><th>حالة العلامة</th><th>وقت التسليم</th></tr></thead>
+        <thead><tr><th>اسم الطالب</th><th>المادة</th><th>الفرع</th><th>العلامة</th><th>المجاب</th><th>حالة العلامة</th><th>وقت التسليم</th></tr></thead>
         <tbody id="resultsRows"></tbody>
       </table>
     </div>
@@ -597,6 +597,7 @@ async function loadTeacherResults(){
       const row=document.createElement("tr");
       const values=[
         item.student_name,
+        "التربية الإسلامية",
         item.branch,
         item.score+" / "+item.max_score,
         item.answered_count+" / 20",
