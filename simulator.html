@@ -83,7 +83,7 @@ footer{text-align:center;color:#64748b;padding:20px;font-size:14px}
   <input id="trainingCode" type="text" placeholder="أدخل رمز التدريب">
 
   <p id="loginError" class="error" role="alert"></p>
-  <p id="keyNotice" class="notice">لم تُدخل الإدارة مفتاح الإجابات بعد؛ لن يبدأ الامتحان قبل إعداده.</p>
+  <p id="keyNotice" class="notice">مفتاح الإجابات الحالي افتراضي للتجربة فقط؛ لا تعتمدوا نتائجه قبل استبداله بمفتاح المعلمة.</p>
   <button class="primary" id="startBtn" type="button">ابدأ الامتحان</button>
 </section>
 
@@ -126,7 +126,7 @@ footer{text-align:center;color:#64748b;padding:20px;font-size:14px}
 </footer>
 
 <script>
-let ADMIN_ANSWER_KEY = null; // مفتاح الإجابات: 20 قيمة بين 0 و3 يحدده المسؤول قبل النشر.
+let ADMIN_ANSWER_KEY = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]; // مفتاح تجريبي مؤقت: جميع الإجابات الخيار الأول، ويجب استبداله بمفتاح المعلمة.
 const originalQuestions = [
   {
     "q": "المقصود (بقطعي الدلالة) هو ما :",
@@ -396,7 +396,7 @@ function startExam(){
   const error = document.getElementById("loginError");
 
   if(!Array.isArray(ADMIN_ANSWER_KEY) || ADMIN_ANSWER_KEY.length !== 20 || ADMIN_ANSWER_KEY.some(answer => !Number.isInteger(answer) || answer < 0 || answer > 3)){
-    error.textContent = "لم تُعد الإدارة مفتاح الإجابات بعد.";
+    error.textContent = "مفتاح الإجابات الحالي تجريبي مؤقت، وليس مفتاح التصحيح المعتمد.";
     return;
   }
 
