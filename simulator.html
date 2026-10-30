@@ -153,10 +153,8 @@ footer{text-align:center;color:#64748b;padding:20px;font-size:14px}
 </section>
 
 <section class="card result" id="result" hidden>
-  <h2>نتيجة الامتحان التدريبي</h2>
+  <h2>تم استلام الامتحان</h2>
   <p id="resultStudent"></p>
-  <div class="score" id="score"></div>
-  <p id="details"></p>
   <p class="notice" id="resultNotice"></p>
   <button class="secondary" id="restartBtn" type="button">إعادة التدريب</button>
 </section>
@@ -515,16 +513,8 @@ async function finishExam(timeEnded){
     exam.hidden = true;
     result.hidden = false;
     document.getElementById("resultStudent").textContent =
-      "اسم الطالب: " + studentName + " — الفرع: " + branchName;
-    document.getElementById("score").textContent =
-      payload.score + " / " + payload.max_score;
-    document.getElementById("details").textContent =
-      "الأسئلة المجابة: " + payload.answered_count + " من 20." +
-      (timeEnded ? " انتهى الوقت." : " تم تسليم الامتحان.");
-    document.getElementById("resultNotice").textContent =
-      payload.is_provisional
-        ? "حُفظت النتيجة ليتمكن المعلم من رؤيتها. العلامة مؤقتة لأن مفتاح المعلمة لم يصل بعد."
-        : "حُفظت نتيجتك ويمكن للمعلم مراجعتها.";
+      "تم تسليم امتحانك بنجاح. سيتمكن المعلم من مراجعة نتيجتك.";
+    document.getElementById("resultNotice").textContent = "";
   }catch(error){
     submitted = false;
     submitButton.disabled = false;
