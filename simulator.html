@@ -84,6 +84,7 @@ footer{text-align:center;color:#64748b;padding:20px;font-size:14px}
 .teacher-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.teacher-actions button{flex:1}
 .results-wrap{overflow:auto}.results-table{width:100%;border-collapse:collapse;min-width:680px}.results-table th,.results-table td{padding:9px;border-bottom:1px solid #e2e8f0;text-align:right}.results-table th{background:#eef4f8}.field-select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit;background:#fff}
 </style>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -154,6 +155,7 @@ footer{text-align:center;color:#64748b;padding:20px;font-size:14px}
     </select>
     <div class="teacher-actions">
       <button class="secondary" id="refreshResults" type="button">تحديث النتائج</button>
+      <button class="secondary" id="exportResults" type="button" disabled>تنزيل النتائج Excel</button>
       <button class="secondary" id="teacherLogout" type="button">تسجيل الخروج</button>
     </div>
     <p id="resultsMessage" class="muted" aria-live="polite"></p>
@@ -202,6 +204,7 @@ const SCHOOL_AUTH_KEY = "sb_publishable_f6WbaIQ81yCeTQ9wgb_wZw_14UyvrPp";
 const resultsDb = window.supabase.createClient(RESULTS_URL, RESULTS_KEY);
 const staffDb = window.supabase.createClient(SCHOOL_AUTH_URL, SCHOOL_AUTH_KEY);
 let branchName = "";
+let currentTeacherResults = [];
 
 const originalQuestions = [
   {
@@ -490,9 +493,12 @@ document.getElementById("teacherLoginForm").addEventListener("submit",async even
   await openTeacherResults();
 });
 document.getElementById("resultsBranch").addEventListener("change",loadTeacherResults);
+document.getElementById("exportResults").addEventListener("click",exportTeacherResults);
 document.getElementById("refreshResults").addEventListener("click",loadTeacherResults);
 document.getElementById("teacherLogout").addEventListener("click",async()=>{
   await staffDb.auth.signOut();
+  currentTeacherResults=[];
+  document.getElementById("exportResults").disabled=true;
   document.getElementById("teacherDashboard").hidden=true;
   document.getElementById("teacherLogin").hidden=false;
   document.getElementById("teacherLoginError").textContent="";
@@ -513,7 +519,42 @@ async function openTeacherResults(){
     "مرحبًا "+profile.full_name+" — النتائج المسجلة";
   await loadTeacherResults();
 }
+function exportTeacherResults(){
+  if(!currentTeacherResults.length) return;
+  if(!window.XLSX){
+    document.getElementById("resultsMessage").textContent="تعذر تجهيز ملف Excel. تحقق من اتصال الإنترنت ثم حدّث النتائج.";
+    return;
+  }
+  const safeText=value=>{
+    const text=String(value??"");
+    return /^[=+@\-\t\r]/.test(text) ? "'"+text : text;
+  };
+  const data=[
+    ["اسم الطالب","المادة","الفرع","العلامة","عدد الإجابات","حالة العلامة","وقت التسليم"],
+    ...currentTeacherResults.map(item=>[
+      safeText(item.student_name),
+      safeText(item.subject),
+      safeText(item.branch),
+      safeText(item.score+" / "+item.max_score),
+      safeText(item.answered_count+" / "+item.max_score),
+      safeText(item.is_provisional?"تجريبية":"معتمدة"),
+      safeText(new Date(item.created_at).toLocaleString("ar-PS"))
+    ])
+  ];
+  const worksheet=XLSX.utils.aoa_to_sheet(data);
+  worksheet["!cols"]=[{wch:28},{wch:24},{wch:14},{wch:14},{wch:16},{wch:16},{wch:24}];
+  const workbook=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook,worksheet,"نتائج الطلاب");
+  const branch=document.getElementById("resultsBranch").value;
+  const branchLabel=branch==="all"?"جميع_الفروع":branch;
+  const date=new Date().toISOString().slice(0,10);
+  XLSX.writeFile(workbook,"نتائج_الطلاب_"+branchLabel+"_"+date+".xlsx",{compression:true});
+}
+
 async function loadTeacherResults(){
+  currentTeacherResults=[];
+  const exportButton=document.getElementById("exportResults");
+  exportButton.disabled=true;
   const message=document.getElementById("resultsMessage");
   const rows=document.getElementById("resultsRows");
   message.textContent="جارٍ تحميل النتائج...";
@@ -533,6 +574,8 @@ async function loadTeacherResults(){
     const payload=await response.json();
     if(!response.ok) throw new Error(payload.error||"تعذر تحميل النتائج.");
     if(!payload.results.length){message.textContent="لا توجد نتائج لهذا الفرع بعد.";return;}
+    currentTeacherResults=payload.results;
+    exportButton.disabled=false;
     payload.results.forEach(item=>{
       const row=document.createElement("tr");
       const values=[
