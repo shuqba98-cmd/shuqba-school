@@ -59,7 +59,7 @@ th{background:#eef4f8}
   <p id="welcome" class="notice"></p>
   <p class="muted">تظهر علامات الامتحانات الإلكترونية تلقائيًا. أدخل علامات المواد الأخرى يدويًا. إذا حُفظت المادة نفسها للطالب والفترة والصف مرة أخرى، تُحدَّث علامتها.</p>
   <div class="grid">
-    <div><label for="term">الفترة</label><input id="term" value="الشهرين 2026" maxlength="40"></div>
+    <div><label for="term">الفترة</label><input id="term" value="الشهرين 2026" maxlength="40" readonly></div>
     <div><label for="branch">الفرع</label><select id="branch"><option value="أدبي">أدبي</option><option value="علمي">علمي</option></select></div>
     <div><label for="className">الصف والشعبة</label><input id="className" value="الثاني عشر الأدبي" maxlength="100"></div>
   </div>
@@ -127,7 +127,11 @@ function mergedEntries(){
 function renderRows(){
   const tbody=byId("marksBody");tbody.replaceChildren();
   const entries=mergedEntries();
-  if(!entries.length){byId("listMessage").textContent="لا توجد علامات لهذه الفترة والفرع بعد.";return}
+  if(!entries.length){
+    byId("listMessage").textContent="لا توجد علامات لهذه الفترة والفرع بعد.";
+    const select=byId("certificateStudent");select.replaceChildren();
+    byId("printCertificate").disabled=true;byId("certificate").hidden=true;return
+  }
   byId("listMessage").textContent="عدد العلامات المسجلة: "+entries.length;
   entries.forEach(m=>{
     const tr=document.createElement("tr");
@@ -149,7 +153,7 @@ async function refreshList(){
     profileName=payload.teacher||"";
     byId("welcome").textContent="مرحبًا "+profileName+" — فترة "+byId("term").value.trim();
     renderRows()
-  }catch(error){manualMarks=[];examResults=[];byId("marksBody").replaceChildren();byId("listMessage").textContent=error.message}
+  }catch(error){manualMarks=[];examResults=[];byId("marksBody").replaceChildren();byId("certificateStudent").replaceChildren();byId("printCertificate").disabled=true;byId("certificate").hidden=true;byId("listMessage").textContent=error.message}
 }
 byId("loginForm").addEventListener("submit",async event=>{
   event.preventDefault();byId("loginMessage").textContent="جارٍ التحقق...";
