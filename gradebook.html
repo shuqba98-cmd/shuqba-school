@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>سجل علامات الشهرين | مدرسة ذكور شقبا الثانوية</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f1f5f9;color:#172554;font:16px/1.8 Tahoma,Arial,sans-serif}
+header{background:#12315a;color:#fff;text-align:center;padding:20px}
+main{max-width:1100px;margin:24px auto;padding:0 14px}
+.card{background:#fff;padding:20px;border-radius:14px;box-shadow:0 4px 18px #0000000d;margin-bottom:18px}
+h1{font-size:23px;margin:0}h2{color:#12315a;margin:0 0 12px}
+label{display:block;font-weight:bold;margin:10px 0 4px}
+input,select,button{font:inherit;padding:10px;border:1px solid #cbd5e1;border-radius:8px}
+input,select{width:100%;background:#fff}
+button{cursor:pointer;font-weight:bold;background:#12315a;color:#fff;border:0;margin-top:12px}
+button.secondary{background:#e2e8f0;color:#12315a}
+button:disabled{opacity:.55;cursor:not-allowed}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.notice{background:#eff6ff;padding:12px;border-radius:8px}
+.error{color:#b91c1c}.muted{color:#64748b}
+.actions{display:flex;gap:10px;flex-wrap:wrap}.actions button{flex:1;min-width:180px}
+.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:680px}
+th,td{padding:9px;border-bottom:1px solid #e2e8f0;text-align:right}
+th{background:#eef4f8}
+.certificate{background:white;padding:30px;border:2px solid #12315a;border-radius:10px;margin-top:20px}
+.cert-header{text-align:center;border-bottom:2px solid #12315a;padding-bottom:12px;margin-bottom:16px}
+.cert-header h2{margin:8px 0}
+.cert-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.totals{display:flex;gap:12px;flex-wrap:wrap;font-weight:bold;margin-top:16px}
+.signatures{display:flex;justify-content:space-between;margin-top:48px}
+[hidden]{display:none!important}
+@media print{
+  @page{size:A4 portrait;margin:14mm}
+  body{background:#fff}
+  body *{visibility:hidden!important}
+  #certificate,#certificate *{visibility:visible!important}
+  #certificate{display:block!important;position:absolute;inset:0 auto auto 0;width:100%;margin:0;border:2px solid #12315a;box-shadow:none;page-break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<header><h1>مدرسة ذكور شقبا الثانوية</h1><div>سجل علامات شهادة الشهرين</div></header>
+<main>
+<section id="loginCard" class="card">
+  <h2>دخول المعلمين والإدارة</h2>
+  <p class="notice">سجّل الدخول بحساب المدرسة لإدخال العلامات وعرض الشهادة.</p>
+  <form id="loginForm">
+    <label for="email">البريد الإلكتروني</label><input id="email" type="email" autocomplete="username" required>
+    <label for="password">كلمة المرور</label><input id="password" type="password" autocomplete="current-password" required>
+    <p id="loginMessage" class="error" role="alert"></p>
+    <button type="submit">تسجيل الدخول</button>
+  </form>
+</section>
+<section id="gradePanel" class="card" hidden>
+  <h2>سجل العلامات</h2>
+  <p id="welcome" class="notice"></p>
+  <p class="muted">تظهر علامات الامتحانات الإلكترونية تلقائيًا. أدخل علامات المواد الأخرى يدويًا. إذا حُفظت المادة نفسها للطالب والفترة والصف مرة أخرى، تُحدَّث علامتها.</p>
+  <div class="grid">
+    <div><label for="term">الفترة</label><input id="term" value="الشهرين 2026" maxlength="40"></div>
+    <div><label for="branch">الفرع</label><select id="branch"><option value="أدبي">أدبي</option><option value="علمي">علمي</option></select></div>
+    <div><label for="className">الصف والشعبة</label><input id="className" value="الثاني عشر الأدبي" maxlength="100"></div>
+  </div>
+  <form id="markForm" class="card">
+    <h2>إضافة علامة مادة</h2>
+    <div class="grid">
+      <div><label for="studentName">اسم الطالب الكامل</label><input id="studentName" required maxlength="100"></div>
+      <div><label for="subject">المادة</label><input id="subject" required maxlength="100" placeholder="مثال: اللغة العربية"></div>
+      <div><label for="score">العلامة</label><input id="score" type="number" min="0" step="0.01" required></div>
+      <div><label for="maxScore">من</label><input id="maxScore" type="number" min="0.01" step="0.01" value="100" required></div>
+    </div>
+    <button type="submit">حفظ العلامة</button>
+    <p id="saveMessage" class="muted" aria-live="polite"></p>
+  </form>
+  <div class="actions">
+    <button class="secondary" id="refresh" type="button">تحديث السجل</button>
+    <button class="secondary" id="logout" type="button">تسجيل الخروج</button>
+  </div>
+  <p id="listMessage" class="muted" aria-live="polite"></p>
+  <div class="table-wrap"><table><thead><tr><th>الطالب</th><th>الصف</th><th>المادة</th><th>العلامة</th><th>المصدر</th></tr></thead><tbody id="marksBody"></tbody></table></div>
+  <div class="grid" style="margin-top:16px">
+    <div><label for="certificateStudent">اختر الطالب لطباعة شهادته</label><select id="certificateStudent"></select></div>
+    <div class="actions" style="align-items:end"><button id="showCertificate" type="button">تجهيز الشهادة</button><button class="secondary" id="printCertificate" type="button" disabled>طباعة الشهادة</button></div>
+  </div>
+  <section id="certificate" class="certificate" hidden>
+    <div class="cert-header"><div>دولة فلسطين — وزارة التربية والتعليم العالي</div><div>مديرية التربية والتعليم بيرزيت</div><h2>شهادة علامات الشهرين</h2><div id="certTerm">الشهرين 2026</div></div>
+    <div class="cert-meta"><div><b>اسم الطالب:</b> <span id="certStudent"></span></div><div><b>الصف والشعبة:</b> <span id="certClass"></span></div><div><b>الفرع:</b> <span id="certBranch"></span></div><div><b>التاريخ:</b> <span id="certDate"></span></div></div>
+    <div class="table-wrap"><table><thead><tr><th>المادة</th><th>العلامة</th><th>النهاية العظمى</th></tr></thead><tbody id="certRows"></tbody></table></div>
+    <div class="totals"><span>المجموع: <span id="certTotal"></span></span><span>النسبة: <span id="certAverage"></span></span></div>
+    <div class="signatures"><span>توقيع ولي الأمر: __________</span><span>مدير المدرسة: __________</span></div>
+  </section>
+</section>
+</main>
+<script>
+const RESULTS_URL="https://wsdvhkdeixwotexlquur.supabase.co";
+const RESULTS_KEY="sb_publishable_WEcwVA21pArWi6HbAbHAUg_ajWl8Pgj";
+const SCHOOL_AUTH_URL="https://nxfnpkelpzpvuotuwmrn.supabase.co";
+const SCHOOL_AUTH_KEY="sb_publishable_f6WbaIQ81yCeTQ9wgb_wZw_14UyvrPp";
+const staffDb=window.supabase.createClient(SCHOOL_AUTH_URL,SCHOOL_AUTH_KEY);
+let manualMarks=[],examResults=[],profileName="";
+const byId=id=>document.getElementById(id);
+function norm(v){return String(v??"").trim().toLocaleLowerCase("ar")}
+async function request(action,extra={}){
+  const {data:{session}}=await staffDb.auth.getSession();
+  if(!session)throw new Error("انتهت الجلسة. سجّل الدخول مجددًا.");
+  const response=await fetch(RESULTS_URL+"/functions/v1/simulator-results",{
+    method:"POST",
+    headers:{"apikey":RESULTS_KEY,"Authorization":"Bearer "+session.access_token,"Content-Type":"application/json"},
+    body:JSON.stringify({action,term:byId("term").value.trim(),branch:byId("branch").value,class_name:byId("className").value.trim(),...extra})
+  });
+  const payload=await response.json();
+  if(!response.ok)throw new Error(payload.error||"تعذر تنفيذ الطلب.");
+  return payload;
+}
+function mergedEntries(){
+  const selectedClass=byId("className").value.trim();
+  const map=new Map();
+  manualMarks.forEach(m=>map.set(norm(m.student_name)+"|"+norm(m.subject),{...m,source:"يدوي"}));
+  examResults.forEach(m=>{
+    const key=norm(m.student_name)+"|"+norm(m.subject);
+    map.set(key,{...m,class_name:selectedClass||("الثاني عشر "+m.branch),source:"إلكتروني"});
+  });
+  return [...map.values()].sort((a,b)=>a.student_name.localeCompare(b.student_name,"ar")||a.subject.localeCompare(b.subject,"ar"));
+}
+function renderRows(){
+  const tbody=byId("marksBody");tbody.replaceChildren();
+  const entries=mergedEntries();
+  if(!entries.length){byId("listMessage").textContent="لا توجد علامات لهذه الفترة والفرع بعد.";return}
+  byId("listMessage").textContent="عدد العلامات المسجلة: "+entries.length;
+  entries.forEach(m=>{
+    const tr=document.createElement("tr");
+    [m.student_name,m.class_name||byId("className").value,m.subject,Number(m.score)+" / "+Number(m.max_score),m.source].forEach(v=>{
+      const td=document.createElement("td");td.textContent=String(v??"");tr.appendChild(td)
+    });tbody.appendChild(tr)
+  });
+  const names=[...new Set(entries.map(m=>m.student_name))].sort((a,b)=>a.localeCompare(b,"ar"));
+  const select=byId("certificateStudent"),prev=select.value;select.replaceChildren();
+  names.forEach(name=>{const o=document.createElement("option");o.value=name;o.textContent=name;select.appendChild(o)});
+  if(names.includes(prev))select.value=prev;
+  byId("printCertificate").disabled=!names.length;
+}
+async function refreshList(){
+  byId("listMessage").textContent="جارٍ تحميل العلامات...";
+  try{
+    const payload=await request("gradebook_list");
+    manualMarks=payload.marks||[];examResults=payload.exam_results||[];
+    profileName=payload.teacher||"";
+    byId("welcome").textContent="مرحبًا "+profileName+" — فترة "+byId("term").value.trim();
+    renderRows()
+  }catch(error){manualMarks=[];examResults=[];byId("marksBody").replaceChildren();byId("listMessage").textContent=error.message}
+}
+byId("loginForm").addEventListener("submit",async event=>{
+  event.preventDefault();byId("loginMessage").textContent="جارٍ التحقق...";
+  const {error}=await staffDb.auth.signInWithPassword({email:byId("email").value.trim(),password:byId("password").value});
+  if(error){byId("loginMessage").textContent="تعذر الدخول. تحقق من بيانات الحساب.";return}
+  const {data:{user}}=await staffDb.auth.getUser();
+  const {data:profile,error:profileError}=await staffDb.from("school_profiles").select("full_name,role").eq("user_id",user.id).maybeSingle();
+  if(profileError||!profile||!["teacher","admin"].includes(profile.role)){await staffDb.auth.signOut();byId("loginMessage").textContent="هذا الحساب ليس له صلاحية سجل العلامات.";return}
+  byId("loginCard").hidden=true;byId("gradePanel").hidden=false;profileName=profile.full_name||"";
+  await refreshList()
+});
+byId("markForm").addEventListener("submit",async event=>{
+  event.preventDefault();byId("saveMessage").textContent="جارٍ حفظ العلامة...";
+  const extra={student_name:byId("studentName").value.trim(),subject:byId("subject").value.trim(),score:Number(byId("score").value),max_score:Number(byId("maxScore").value)};
+  try{await request("gradebook_save",extra);byId("saveMessage").textContent="حُفظت العلامة.";byId("score").value="";await refreshList()}
+  catch(error){byId("saveMessage").textContent=error.message}
+});
+byId("branch").addEventListener("change",()=>{byId("className").value="الثاني عشر "+byId("branch").value;refreshList()});
+byId("term").addEventListener("change",refreshList);
+byId("className").addEventListener("change",refreshList);
+byId("refresh").addEventListener("click",refreshList);
+byId("logout").addEventListener("click",async()=>{await staffDb.auth.signOut();manualMarks=[];examResults=[];byId("gradePanel").hidden=true;byId("loginCard").hidden=false;byId("loginMessage").textContent=""});
+byId("showCertificate").addEventListener("click",()=>{
+  const name=byId("certificateStudent").value;
+  const marks=mergedEntries().filter(m=>norm(m.student_name)===norm(name));
+  if(!name||!marks.length){byId("listMessage").textContent="لا توجد علامات للطالب المحدد.";return}
+  byId("certRows").replaceChildren();let total=0,max=0;
+  marks.forEach(m=>{total+=Number(m.score);max+=Number(m.max_score);const tr=document.createElement("tr");[m.subject,Number(m.score).toFixed(2).replace(/\.00$/,""),Number(m.max_score).toFixed(2).replace(/\.00$/,"")].forEach(v=>{const td=document.createElement("td");td.textContent=String(v);tr.appendChild(td)});byId("certRows").appendChild(tr)});
+  byId("certTerm").textContent=byId("term").value.trim();byId("certStudent").textContent=name;byId("certClass").textContent=marks[0].class_name||byId("className").value;byId("certBranch").textContent=byId("branch").value;byId("certDate").textContent=new Date().toLocaleDateString("ar-PS");byId("certTotal").textContent=total.toFixed(2).replace(/\.00$/,"")+" / "+max.toFixed(2).replace(/\.00$/,"");byId("certAverage").textContent=max?((total/max)*100).toFixed(1)+"%":"—";byId("certificate").hidden=false;byId("printCertificate").disabled=false;
+});
+byId("printCertificate").addEventListener("click",()=>window.print());
+</script>
+</body>
+</html>
