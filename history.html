@@ -81,7 +81,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 footer{text-align:center;color:#64748b;padding:20px;font-size:14px}
 [hidden]{display:none!important}
 .header-institution{width:100%;text-align:right;font-weight:bold}.header-institution p{margin:0}
-.teacher-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.teacher-actions button{flex:1}
+.teacher-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.teacher-actions button{flex:1}.teacher-actions .gradebook-link{flex:1;display:block;text-align:center;text-decoration:none;padding:10px;border-radius:9px;font-weight:bold}
 .results-wrap{overflow:auto}.results-table{width:100%;border-collapse:collapse;min-width:680px}.results-table th,.results-table td{padding:9px;border-bottom:1px solid #e2e8f0;text-align:right}.results-table th{background:#eef4f8}.field-select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit;background:#fff}
 </style>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
@@ -155,6 +155,7 @@ footer{text-align:center;color:#64748b;padding:20px;font-size:14px}
     <div class="teacher-actions">
       <button class="secondary" id="refreshResults" type="button">تحديث النتائج</button>
       <button class="secondary" id="exportResults" type="button" disabled>تنزيل النتائج Excel</button>
+      <a class="secondary gradebook-link" href="gradebook.html">سجل علامات الشهرين وطباعة الشهادات</a>
       <button class="secondary" id="teacherLogout" type="button">تسجيل الخروج</button>
     </div>
     <p id="resultsMessage" class="muted" aria-live="polite"></p>
