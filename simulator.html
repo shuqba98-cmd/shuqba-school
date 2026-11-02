@@ -451,6 +451,14 @@ async function finishExam(timeEnded){
       })
     });
     const payload = await response.json();
+    if(response.status === 409){
+      exam.hidden = true;
+      result.hidden = false;
+      document.getElementById("resultStudent").textContent =
+        "هذه المحاولة مسجلة مسبقًا، ولم تُضف محاولة جديدة.";
+      document.getElementById("resultNotice").textContent = "";
+      return;
+    }
     if(!response.ok) throw new Error(payload.error || "تعذر حفظ النتيجة.");
 
     exam.hidden = true;
