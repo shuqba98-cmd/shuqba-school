@@ -508,7 +508,11 @@ function shuffle(array){
 }
 
 function prepareQuestions(){
-  examQuestions = shuffle(originalQuestions.map((item,originalIndex)=>({...item,originalIndex}))).map(item => {
+  const withIndexes = (items, offset) => items.map((item,index)=>({...item,originalIndex:offset+index}));
+  const partOne = withIndexes(originalQuestions.slice(0,11),0);
+  const partTwo = shuffle(withIndexes(originalQuestions.slice(11,19),11));
+  const partThree = shuffle(withIndexes(originalQuestions.slice(19),19));
+  examQuestions = [...partOne,...partTwo,...partThree].map(item => {
     const options = shuffle(
       item.options.map((text,originalOptionIndex) => ({ text, originalOptionIndex }))
     );
