@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>امتحان اللغة الإنجليزية — الصف الثاني عشر الأدبي | مدرسة ذكور شقبا الثانوية</title>
+<title>امتحان اللغة الإنجليزية — الصف الحادي عشر الأدبي | مدرسة ذكور شقبا الثانوية</title>
 <style>
 *{box-sizing:border-box}
 body{
@@ -99,7 +99,7 @@ footer{text-align:center;color:#64748b;padding:20px;font-size:14px}
     </div>
     <span class="header-spacer" aria-hidden="true"></span>
   </div>
-  <h1>امتحان اللغة الإنجليزية — الصف الثاني عشر الأدبي</h1>
+  <h1>امتحان اللغة الإنجليزية — الصف الحادي عشر الأدبي</h1>
 </header>
 
 <main class="container">
@@ -107,15 +107,21 @@ footer{text-align:center;color:#64748b;padding:20px;font-size:14px}
 <section class="card" id="login">
   <h2>الدخول إلى امتحان اللغة الإنجليزية</h2>
   <p class="notice">
-    امتحان إلكتروني تجريبي — ٣٠ سؤالًا بترتيب عشوائي. مدة الامتحان ٥٠ دقيقة. تُحفظ العلامة في سجل الإدارة بعد التسليم.
+    امتحان إلكتروني تجريبي — ٣٠ سؤالًا بترتيب عشوائي. مدة الامتحان ٦٠ دقيقة. تُحفظ العلامة في سجل الإدارة بعد التسليم.
   </p>
 
   <label for="studentName">اسم الطالب</label>
   <input id="studentName" type="text" placeholder="أدخل اسم الطالب">
 
-  <label for="branch">الفرع — الصف الثاني عشر الأدبي</label>
+  <label for="branch">الفرع — الصف الحادي عشر الأدبي</label>
   <select id="branch" class="field-select">
     <option value="أدبي" selected>أدبي</option>
+  </select>
+
+  <label for="classSection">الشعبة</label>
+  <select id="classSection" class="field-select">
+    <option value="أ">أ</option>
+    <option value="ب">ب</option>
   </select>
 
   <label for="trainingCode">رمز التدريب</label>
@@ -161,7 +167,7 @@ footer{text-align:center;color:#64748b;padding:20px;font-size:14px}
     <p id="resultsMessage" class="muted" aria-live="polite"></p>
     <div class="results-wrap">
       <table class="results-table">
-        <thead><tr><th>اسم الطالب</th><th>المادة</th><th>الفرع</th><th>العلامة</th><th>المجاب</th><th>حالة العلامة</th><th>وقت التسليم</th></tr></thead>
+        <thead><tr><th>اسم الطالب</th><th>المادة</th><th>الفرع</th><th>الشعبة</th><th>العلامة</th><th>المجاب</th><th>حالة العلامة</th><th>وقت التسليم</th></tr></thead>
         <tbody id="resultsRows"></tbody>
       </table>
     </div>
@@ -173,7 +179,7 @@ footer{text-align:center;color:#64748b;padding:20px;font-size:14px}
   <div class="topbar">
     <span id="studentInfo"></span>
     <span>العلامة: 30</span>
-    <span class="timer">الوقت المتبقي: <span id="timer">50:00</span></span>
+    <span class="timer">الوقت المتبقي: <span id="timer">60:00</span></span>
   </div>
 
   <p class="notice">اختر إجابة واحدة لكل سؤال، ثم اضغط «تسليم الامتحان».</p>
@@ -204,6 +210,7 @@ const SCHOOL_AUTH_KEY = "sb_publishable_f6WbaIQ81yCeTQ9wgb_wZw_14UyvrPp";
 const resultsDb = window.supabase.createClient(RESULTS_URL, RESULTS_KEY);
 const staffDb = window.supabase.createClient(SCHOOL_AUTH_URL, SCHOOL_AUTH_KEY);
 let branchName = "";
+let studentSection = "";
 let currentTeacherResults = [];
 
 const originalQuestions = [
@@ -480,7 +487,7 @@ const originalQuestions = [
 ];
 
 let examQuestions = [];
-let remainingSeconds = 3000;
+let remainingSeconds = 3600;
 let timerInterval = null;
 let submitted = false;
 let studentName = "";
@@ -554,25 +561,27 @@ function startExam(){
   const studentNameInput = document.getElementById("studentName").value.trim();
   const code = document.getElementById("trainingCode").value.trim();
   const branch = document.getElementById("branch").value;
+  const section = document.getElementById("classSection").value;
   const error = document.getElementById("loginError");
 
-  if(!studentNameInput || !code || !branch){
-    error.textContent = "أدخل اسم الطالب والفرع ورمز التدريب للمتابعة.";
+  if(!studentNameInput || !code || !branch || !section){
+    error.textContent = "أدخل اسم الطالب والفرع والشعبة ورمز التدريب للمتابعة.";
     return;
   }
 
   error.textContent = "";
   studentName = studentNameInput;
   branchName = branch;
+  studentSection = section;
   submitted = false;
-  remainingSeconds = 3000;
+  remainingSeconds = 3600;
 
   prepareQuestions();
   renderQuestions();
   updateTimer();
 
   document.getElementById("studentInfo").textContent =
-    "اسم الطالب: " + studentName + " — الفرع: " + branchName;
+    "اسم الطالب: " + studentName + " — الفرع: " + branchName + " — الشعبة: " + studentSection;
 
   login.hidden = true;
   result.hidden = true;
@@ -626,6 +635,7 @@ async function finishExam(timeEnded){
         exam_subject:"اللغة الإنجليزية",
         student_name:studentName,
         branch:branchName,
+        section:studentSection,
         training_code:document.getElementById("trainingCode").value.trim(),
         responses
       })
@@ -719,11 +729,12 @@ function exportTeacherResults(){
     return /^[=+@\-\t\r]/.test(text) ? "'"+text : text;
   };
   const data=[
-    ["اسم الطالب","المادة","الفرع","العلامة","عدد الإجابات","حالة العلامة","وقت التسليم"],
+    ["اسم الطالب","المادة","الفرع","الشعبة","العلامة","عدد الإجابات","حالة العلامة","وقت التسليم"],
     ...currentTeacherResults.map(item=>[
       safeText(item.student_name),
       safeText(item.subject),
       safeText(item.branch),
+      safeText(item.class_section||""),
       safeText(item.score+" / "+item.max_score),
       safeText(item.answered_count+" / "+item.max_score),
       safeText(item.is_provisional?"تجريبية":"معتمدة"),
@@ -731,7 +742,7 @@ function exportTeacherResults(){
     ])
   ];
   const worksheet=XLSX.utils.aoa_to_sheet(data);
-  worksheet["!cols"]=[{wch:28},{wch:24},{wch:14},{wch:14},{wch:16},{wch:16},{wch:24}];
+  worksheet["!cols"]=[{wch:28},{wch:24},{wch:14},{wch:12},{wch:14},{wch:16},{wch:16},{wch:24}];
   const workbook=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook,worksheet,"نتائج الطلاب");
   const branch=document.getElementById("resultsBranch").value;
@@ -762,15 +773,16 @@ async function loadTeacherResults(){
     });
     const payload=await response.json();
     if(!response.ok) throw new Error(payload.error||"تعذر تحميل النتائج.");
-    currentTeacherResults=payload.results.filter(item=>item.subject==="اللغة الإنجليزية");
+    currentTeacherResults=payload.results.filter(item=>item.subject==="اللغة الإنجليزية" && item.grade===11);
     if(!currentTeacherResults.length){message.textContent="لا توجد نتائج للغة الإنجليزية لهذا الفرع بعد.";return;}
     exportButton.disabled=false;
-    payload.results.forEach(item=>{
+    currentTeacherResults.forEach(item=>{
       const row=document.createElement("tr");
       const values=[
         item.student_name,
         item.subject,
         item.branch,
+        item.class_section||"—",
         item.score+" / "+item.max_score,
         item.answered_count+" / "+item.max_score,
         item.is_provisional?"تجريبية":"معتمدة",
