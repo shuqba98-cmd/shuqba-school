@@ -163,7 +163,7 @@ footer{text-align:center;color:#64748b;padding:20px;font-size:14px}
   <div class="topbar">
     <span id="studentInfo"></span>
     <span>العلامة: 20 — لكل سؤال علامة واحدة</span>
-    <span class="timer">الوقت المتبقي: <span id="timer">50:00</span></span>
+    <span class="timer">الوقت المتبقي: <span id="timer">40:00</span></span>
   </div>
 
   <p class="notice">اختر إجابة واحدة لكل سؤال، ثم اضغط «تسليم الامتحان».</p>
@@ -380,7 +380,7 @@ const originalQuestions = [
 ];
 
 let examQuestions = [];
-let remainingSeconds = 3000;
+let remainingSeconds = 2400;
 let timerInterval = null;
 let submitted = false;
 let studentName = "";
@@ -465,7 +465,7 @@ function startExam(){
   studentName = studentNameInput;
   branchName = branch;
   submitted = false;
-  remainingSeconds = 3000;
+  remainingSeconds = 2400;
 
   prepareQuestions();
   renderQuestions();
