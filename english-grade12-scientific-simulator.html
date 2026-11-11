@@ -907,7 +907,7 @@ async function loadTeacherResults(){
     });
     const payload=await response.json();
     if(!response.ok) throw new Error(payload.error||"تعذر تحميل النتائج.");
-    currentTeacherResults=payload.results.filter(item=>item.subject==="اللغة الإنجليزية" && item.grade===12);
+    currentTeacherResults=payload.results.filter(item=>["اللغة الإنجليزية","اللغة الإنجليزية للصف الثاني عشر العلمي"].includes(item.subject) && item.grade===12);
     if(!currentTeacherResults.length){message.textContent="لا توجد نتائج للغة الإنجليزية لهذا الفرع بعد.";return;}
     exportButton.disabled=false;
     currentTeacherResults.forEach(item=>{
